@@ -41,14 +41,16 @@ planner → implementer → test-engineer + security-reviewer* → code-reviewer
 
 ```
 NudgeAI/
-├── App/                     — app entry point, App Intents (Siri) registration
-├── Capture/                 — Siri capture intent, in-app capture UI, speech-to-text
-├── Classification/          — Claude API client, prompt templates, JSON contract parsing
-├── Review/                  — nightly review flow and UI
-├── Reminders/               — long-horizon escalation scheduling logic
-├── Notifications/           — UNUserNotificationCenter scheduling and copy generation
-├── Persistence/             — SwiftData models (ReminderItem) and repositories
-├── Settings/                — API key entry (Keychain), lead-time config, review time config
+├── App/                     — app entry point, App Intents (Siri) registration, TabBar host
+├── Onboarding/              — Welcome, Connect Claude, Teach Siri, Permissions (first-launch wizard)
+├── Capture/                 — Siri capture intent, in-app capture UI, speech-to-text, confirmation feedback
+├── Classification/          — Claude API client, prompt templates, JSON contract parsing, unreachable-state tracking
+├── Review/                  — nightly review flow and swipeable card-stack UI
+├── Reminders/               — long-horizon escalation scheduling logic, Long-horizon tab, Reminder detail screen
+├── Notifications/           — UNUserNotificationCenter scheduling, quiet hours, copy generation
+├── Persistence/             — SwiftData models (ReminderItem, AppSettings) and repositories
+├── Settings/                — API key entry (Keychain), capture/review/nudge/model config, spend alert
+├── Profile/                 — stats screen (capture count, review rate, avg capture time, Claude usage)
 └── Tests/                   — unit tests, no UI/framework imports in core logic tests
 ```
 
@@ -56,10 +58,11 @@ NudgeAI/
 
 1. Phase 0 — Project scaffolding (builds, zero feature code)
 2. Phase 1 — Validate the core moment: Siri App Intent + raw capture-to-storage path only
-3. Phase 2 — Classification and nightly review (Claude API integration)
-4. Phase 3 — In-app conversational capture
-5. Phase 4 — Long-horizon escalation workflow
-6. Phase 5 — Polish and refinement (visual design, configurable settings)
+3. Phase 2 — Classification and nightly review (Claude API integration, Claude-unreachable state)
+4. Phase 3 — In-app conversational capture (quick-reply follow-ups)
+5. Phase 4 — Long-horizon escalation workflow (tab, detail screen, history)
+6. Phase 5 — Onboarding, Settings, and Profile
+7. Phase 6 — Polish and refinement (visual design, spend-estimate accuracy)
 
 ## Non-Negotiable Rules
 
@@ -73,3 +76,6 @@ NudgeAI/
 - No notification fires if there is nothing to review — avoid notification fatigue.
 - Core logic (classification parsing, scheduling rules) must be unit-testable with zero UI/framework imports.
 - Do not implement anything in SPEC.md out-of-scope section.
+- Nudge AI has no backend/server/account system — the app talks directly to the user's own Anthropic API key over HTTPS.
+- When Claude is unreachable, never lose a captured nudge and never silently retry review — surface it plainly (Today banner, paused review) and resume automatically once reachable.
+- Settings-driven behavior (quiet hours, lead times, model choice, ambiguous-transcription policy, spend alert) must be read live from `AppSettings`, never hardcoded, since the design treats all of these as user-configurable from day one.

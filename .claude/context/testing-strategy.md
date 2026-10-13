@@ -20,7 +20,15 @@ owned_by: documenter
   - Long-horizon notification scheduling math (lead-time offsets, due-date
     check-in timing)
   - Reschedule-on-incomplete logic (recomputing `nextNudgeAt` correctly
-    across recurring interval types)
+    across recurring interval types) and `lastCompletedAt` updates on
+    "Done"
+  - Quiet-hours delivery holding (a notification due inside the window is
+    delayed to the window's end, not dropped)
+  - Quick-reply chip resolution (in-app follow-up taps → concrete
+    deadline/recurring_interval, with no API round-trip)
+  - Local spend estimate math (requests × model pricing, across a model
+    switch mid-month)
+  - "Long-horizon tab" query logic (Nudging soon vs. Later partitioning)
 
 ## What not to test
 
