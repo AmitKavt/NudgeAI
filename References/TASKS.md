@@ -5,13 +5,13 @@ updated_by: planner (adds tasks), documenter (marks complete)
 
 # TASKS.md — Nudge AI Build Checklist
 
-## Phase 0: Project Scaffolding
+## Phase 0: Project Scaffolding — ✅ complete
 Done criteria: project builds with zero errors, no feature code.
 
-- [ ] Create Xcode project (SwiftUI app, iOS 17+ deployment target)  [status: todo]  [agent: implementer]
-- [ ] Create empty module folders per CLAUDE.md structure (App, Onboarding, Capture, Classification, Review, Reminders, Notifications, Persistence, Settings, Profile, Tests)  [status: todo]  [agent: implementer]
-- [ ] Add empty SwiftData model container boilerplate in Persistence  [status: todo]  [agent: implementer]
-- [ ] Confirm project builds with zero errors on simulator  [status: todo]  [agent: implementer]
+- [x] Create Xcode project (SwiftUI app, iOS 17+ deployment target)  [status: done]  [agent: implementer]
+- [x] Create empty module folders per CLAUDE.md structure (App, Onboarding, Capture, Classification, Review, Reminders, Notifications, Persistence, Settings, Profile, Tests)  [status: done]  [agent: implementer]
+- [x] Add empty SwiftData model container boilerplate in Persistence  [status: done]  [agent: implementer]
+- [x] Confirm project builds with zero errors on simulator  [status: done]  [agent: implementer]
 
 ## Phase 1: Validate the Core Moment (Siri Capture)
 Done criteria: Siri App Intent captures speech and writes a ReminderItem with zero required input, works with phone locked.

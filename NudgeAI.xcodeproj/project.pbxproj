@@ -1,0 +1,507 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		20455810CA58ACC45F790663 /* PersistenceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 823B4F56F5DBA307F4189825 /* PersistenceContainer.swift */; };
+		4D07A20C82444D091A99BEC1 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69AB90AA0B5E31AC6948B95C /* ContentView.swift */; };
+		A98689B74C4B4C044AD23C07 /* NudgeAIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7551BB117722D9B43864E94E /* NudgeAIApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1209F4168D64AC18014FD21C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34EB0A3C5D1064F52B2173A0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 389B87BA83DAAB9847729F62;
+			remoteInfo = NudgeAI;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0079B69D2E46052E57C6F145 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		271FBF58D80AAE042BC0C652 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		288C1C579E63BEA99F1EFD2B /* NudgeAITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = NudgeAITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		346BA0EAF908CA954F4CB8D8 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		517F813401541397F8C958AC /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		573EBFBC7188BD4B9E308F5C /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		69AB90AA0B5E31AC6948B95C /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		7551BB117722D9B43864E94E /* NudgeAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NudgeAIApp.swift; sourceTree = "<group>"; };
+		7AB471FF0B0100F570E20B4C /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		823B4F56F5DBA307F4189825 /* PersistenceContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceContainer.swift; sourceTree = "<group>"; };
+		A3E125A39021913D329FBD0C /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		A8B4DD3B18C2E1BDA5FDB4D7 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+		CEA3DB9CE8A8BFE24857AF3D /* NudgeAI.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = NudgeAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1F89FC01841A7B42036ABA0 /* .gitkeep */ = {isa = PBXFileReference; path = .gitkeep; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0567B0F14ECC592B23C9E37C /* Capture */ = {
+			isa = PBXGroup;
+			children = (
+				346BA0EAF908CA954F4CB8D8 /* .gitkeep */,
+			);
+			path = Capture;
+			sourceTree = "<group>";
+		};
+		10EC19D3AD8155574CF05F64 = {
+			isa = PBXGroup;
+			children = (
+				162593D6914A48FDA4799C8B /* NudgeAI */,
+				C2F87185FC58E4775F0FCC43 /* NudgeAITests */,
+				B7A46913D1C90FE977FF8089 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		144EFDDE9DEFA0E8849CB534 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				823B4F56F5DBA307F4189825 /* PersistenceContainer.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		162593D6914A48FDA4799C8B /* NudgeAI */ = {
+			isa = PBXGroup;
+			children = (
+				6ADD2886453E2A23EAC582E1 /* App */,
+				0567B0F14ECC592B23C9E37C /* Capture */,
+				82FB7E570CB0E9625ECABDCF /* Classification */,
+				2873E14A31E151C051708C89 /* Notifications */,
+				4269A57938916EE91BFFA7F0 /* Onboarding */,
+				144EFDDE9DEFA0E8849CB534 /* Persistence */,
+				9835035680B64A861E8D179B /* Profile */,
+				B52235A83967E044CB55AA99 /* Reminders */,
+				CDF5CC8B0DF15E412D1CF3F5 /* Review */,
+				FCA5DD8D023D0DEF93C95B72 /* Settings */,
+			);
+			path = NudgeAI;
+			sourceTree = "<group>";
+		};
+		2873E14A31E151C051708C89 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				7AB471FF0B0100F570E20B4C /* .gitkeep */,
+			);
+			path = Notifications;
+			sourceTree = "<group>";
+		};
+		4269A57938916EE91BFFA7F0 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				A3E125A39021913D329FBD0C /* .gitkeep */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		6ADD2886453E2A23EAC582E1 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				69AB90AA0B5E31AC6948B95C /* ContentView.swift */,
+				7551BB117722D9B43864E94E /* NudgeAIApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		82FB7E570CB0E9625ECABDCF /* Classification */ = {
+			isa = PBXGroup;
+			children = (
+				E1F89FC01841A7B42036ABA0 /* .gitkeep */,
+			);
+			path = Classification;
+			sourceTree = "<group>";
+		};
+		9835035680B64A861E8D179B /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				271FBF58D80AAE042BC0C652 /* .gitkeep */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		B52235A83967E044CB55AA99 /* Reminders */ = {
+			isa = PBXGroup;
+			children = (
+				517F813401541397F8C958AC /* .gitkeep */,
+			);
+			path = Reminders;
+			sourceTree = "<group>";
+		};
+		B7A46913D1C90FE977FF8089 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CEA3DB9CE8A8BFE24857AF3D /* NudgeAI.app */,
+				288C1C579E63BEA99F1EFD2B /* NudgeAITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C2F87185FC58E4775F0FCC43 /* NudgeAITests */ = {
+			isa = PBXGroup;
+			children = (
+				573EBFBC7188BD4B9E308F5C /* .gitkeep */,
+			);
+			path = NudgeAITests;
+			sourceTree = "<group>";
+		};
+		CDF5CC8B0DF15E412D1CF3F5 /* Review */ = {
+			isa = PBXGroup;
+			children = (
+				0079B69D2E46052E57C6F145 /* .gitkeep */,
+			);
+			path = Review;
+			sourceTree = "<group>";
+		};
+		FCA5DD8D023D0DEF93C95B72 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A8B4DD3B18C2E1BDA5FDB4D7 /* .gitkeep */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		389B87BA83DAAB9847729F62 /* NudgeAI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8CE9FE639FE99A0F5E5E2C0F /* Build configuration list for PBXNativeTarget "NudgeAI" */;
+			buildPhases = (
+				B3F6C9ACB033E6F00EFFD0D5 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NudgeAI;
+			packageProductDependencies = (
+			);
+			productName = NudgeAI;
+			productReference = CEA3DB9CE8A8BFE24857AF3D /* NudgeAI.app */;
+			productType = "com.apple.product-type.application";
+		};
+		6EB1A95AE6545768022AE4E6 /* NudgeAITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8F1E2681A5659F1B74F2BCC6 /* Build configuration list for PBXNativeTarget "NudgeAITests" */;
+			buildPhases = (
+				995F63164388B035A0A83DA7 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E2226840DA0071D3E3848977 /* PBXTargetDependency */,
+			);
+			name = NudgeAITests;
+			packageProductDependencies = (
+			);
+			productName = NudgeAITests;
+			productReference = 288C1C579E63BEA99F1EFD2B /* NudgeAITests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		34EB0A3C5D1064F52B2173A0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					389B87BA83DAAB9847729F62 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					6EB1A95AE6545768022AE4E6 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 9DA929E470C591F7AD589CA2 /* Build configuration list for PBXProject "NudgeAI" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 10EC19D3AD8155574CF05F64;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = B7A46913D1C90FE977FF8089 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				389B87BA83DAAB9847729F62 /* NudgeAI */,
+				6EB1A95AE6545768022AE4E6 /* NudgeAITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		995F63164388B035A0A83DA7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B3F6C9ACB033E6F00EFFD0D5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4D07A20C82444D091A99BEC1 /* ContentView.swift in Sources */,
+				A98689B74C4B4C044AD23C07 /* NudgeAIApp.swift in Sources */,
+				20455810CA58ACC45F790663 /* PersistenceContainer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E2226840DA0071D3E3848977 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 389B87BA83DAAB9847729F62 /* NudgeAI */;
+			targetProxy = 1209F4168D64AC18014FD21C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0FFCC46B9558D3FE45E618BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		18F10386DC8BD191B8587D78 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shwairatech.nudgeai;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1A2F80801EC404E15FB136D9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shwairatech.nudgeai.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NudgeAI.app/NudgeAI";
+			};
+			name = Release;
+		};
+		C513AFCBEE417DA53471B12D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		D3030C1242CB06E3AA1886D3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shwairatech.nudgeai;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		FA32D41DD5134080F7046647 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shwairatech.nudgeai.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NudgeAI.app/NudgeAI";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8CE9FE639FE99A0F5E5E2C0F /* Build configuration list for PBXNativeTarget "NudgeAI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				18F10386DC8BD191B8587D78 /* Debug */,
+				D3030C1242CB06E3AA1886D3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		8F1E2681A5659F1B74F2BCC6 /* Build configuration list for PBXNativeTarget "NudgeAITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA32D41DD5134080F7046647 /* Debug */,
+				1A2F80801EC404E15FB136D9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9DA929E470C591F7AD589CA2 /* Build configuration list for PBXProject "NudgeAI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0FFCC46B9558D3FE45E618BB /* Debug */,
+				C513AFCBEE417DA53471B12D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 34EB0A3C5D1064F52B2173A0 /* Project object */;
+}

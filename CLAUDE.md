@@ -29,6 +29,21 @@ planner → implementer → test-engineer + security-reviewer* → code-reviewer
 - Figma file (16 screens, source of truth for all UI): https://www.figma.com/design/oB82tlQm7eyDgsMdIuHKjx/Nudge-AI-%E2%80%94-iOS-Designs
 - Screen → Figma node-id map: `References/Mockups/README.md`
 
+## Project Generation
+
+The Xcode project is generated from `project.yml` via [XcodeGen](https://github.com/yonaskolb/XcodeGen)
+(`brew install xcodegen`). After adding/removing/renaming source files or
+targets, regenerate with:
+
+```
+xcodegen generate
+```
+
+Both `project.yml` and the generated `NudgeAI.xcodeproj` are committed so
+the project opens directly in Xcode without requiring XcodeGen — but
+`project.yml` is the source of truth; hand-edits to the `.xcodeproj` file
+list will be overwritten on the next `xcodegen generate`.
+
 ## Tech Stack
 
 - **Language:** Swift
