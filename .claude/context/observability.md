@@ -15,7 +15,7 @@ owned_by: documenter
   enough to debug the pipeline without reconstructing app state.
 - Log levels: `.info` for normal flow events, `.error` for classification
   failures / API errors, `.debug` for anything only useful during active
-  development (strip or gate behind a debug build flag before Phase 5).
+  development (strip or gate behind a debug build flag before Phase 6).
 
 ## What must never be logged
 

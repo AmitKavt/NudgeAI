@@ -34,9 +34,11 @@ Developer starts a new phase, feature, or bug fix. Always first.
 3. Break phase into 3–6 atomic tasks (one implementer session each)
 4. For each task: note affected module, context files needed, security flag
    (true only when the task touches the Anthropic API key / Keychain)
-5. If phase involves UI (Phase 1 capture UI, Phase 2 review UI, Phase 3
-   in-app capture, Phase 5 polish): confirm mockup exists in
-   `References/Mockups/` first
+5. If phase involves UI (Phase 2 capture/review UI, Phase 3 in-app
+   capture, Phase 4 Long-horizon tab/detail, Phase 5 onboarding/
+   Settings/Profile, Phase 6 polish): confirm the relevant screen is
+   mapped in `References/Mockups/README.md` (Figma node-id reference)
+   first — mockups live in Figma, not as local files
 6. Write tasks to TASKS.md with status: todo
 7. Draft handoff to implementer
 
