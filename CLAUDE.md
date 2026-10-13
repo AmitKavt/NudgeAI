@@ -24,6 +24,11 @@ Pipeline:
 planner → implementer → test-engineer + security-reviewer* → code-reviewer → documenter
 *security-reviewer only if auth / secrets / sensitive data is touched
 
+## Design Reference
+
+- Figma file (16 screens, source of truth for all UI): https://www.figma.com/design/oB82tlQm7eyDgsMdIuHKjx/Nudge-AI-%E2%80%94-iOS-Designs
+- Screen → Figma node-id map: `References/Mockups/README.md`
+
 ## Tech Stack
 
 - **Language:** Swift
