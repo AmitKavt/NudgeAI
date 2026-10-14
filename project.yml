@@ -15,12 +15,20 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: NudgeAI
+    info:
+      path: NudgeAI/Info.plist
+      properties:
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations~iphone:
+          - UIInterfaceOrientationPortrait
+        NSMicrophoneUsageDescription: "Nudge AI uses the microphone to capture spoken nudges."
+        NSSpeechRecognitionUsageDescription: "Nudge AI transcribes your spoken nudges on-device."
+        UIAppFonts:
+          - InstrumentSerif-Regular.ttf
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.shwairatech.nudgeai
-        INFOPLIST_KEY_UILaunchScreen_Generation: YES
-        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
-        GENERATE_INFOPLIST_FILE: YES
+        GENERATE_INFOPLIST_FILE: NO
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
   NudgeAITests:

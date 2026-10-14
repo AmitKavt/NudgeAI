@@ -7,13 +7,29 @@ owned_by: documenter
 
 # API Conventions
 
-## Claude API contract (Classification module)
+## LLM provider contract (Classification module)
 
-Model: user-selectable in Settings — **Claude Haiku** (default, per-item
-classification and nightly digest) or **Claude Sonnet** (opt-in, applies
-to all Claude calls including in-app conversational follow-ups). The
-model choice is read from `AppSettings.selectedModel` at call time — it
-is never hardcoded or silently overridden per call type in v1.
+All calls go through one provider-neutral protocol; prompts and the JSON
+contract below are shared. Each platform has a thin URLSession adapter
+(own URL, auth headers, request/response envelope), no provider SDKs:
+- **Anthropic:** `/v1/messages`, `x-api-key` + `anthropic-version`, top-
+  level `system`, text in `content[].text`.
+- **DeepSeek:** OpenAI-compatible `chat/completions`, `Authorization:
+  Bearer`, `system` message, text in `choices[0].message.content`
+  (verify model IDs/JSON mode against current docs).
+
+A client factory returns `nil` when `AppSettings.provider` is none or no
+key is stored; callers then skip classification — not an error, no
+unreachable state. Entering a key triggers one minimal key-check request
+before "Connected"; failure stores nothing.
+
+Model: user-selectable in Settings from the selected platform's list
+(Anthropic: **Claude Haiku** default, **Claude Sonnet** opt-in; DeepSeek:
+cheapest chat model default). Read from `AppSettings` (provider + a
+provider-scoped model id string) at call time — never hardcoded or
+silently overridden per call type. Changing platform resets the model to
+that platform's default. Provider-specific names/model IDs live only in
+adapters and their model lists.
 
 Request: one call per capture — transcribed `rawText` + a system prompt
 instructing strict JSON output.
@@ -33,10 +49,10 @@ Response contract (must parse exactly, reject/flag anything else):
 - `confidence` below the configured threshold → item is NOT silently
   accepted; it's flagged for nightly review (`reviewedAt` stays null).
 - Malformed/unparseable JSON → treat as a classification failure, not a
-  crash — surface via the Claude-unreachable/paused-review state (never
+  crash — surface via the provider-unreachable/paused-review state (never
   retry indefinitely).
 - A request that fails outright (network error, timeout, 5xx) sets the
-  app-wide "Claude unreachable" state, consumed by the Today banner and
+  app-wide "provider unreachable" state, consumed by the Today banner and
   Review's paused state; it clears automatically once a request succeeds.
 - Nightly digest call: one call per day, batches all open low-confidence
   items, same JSON shape per item.
@@ -47,7 +63,7 @@ When the in-app conversational flow asks a follow-up and the user taps a
 quick-reply chip ("This week," "This month," "Every 6 months," "No
 deadline"), the client resolves that tap to a concrete `deadline` or
 `recurring_interval` value **locally** — it does not round-trip back to
-Claude to reparse the chip. Claude's role in this flow is limited to
+the provider to reparse the chip. The provider's role in this flow is limited to
 generating the follow-up question and the set of quick-reply options
 (a single call), not interpreting the user's selection.
 
@@ -55,9 +71,11 @@ generating the follow-up question and the set of quick-reply options
 
 Classification maintains a local running total of the current calendar
 month's estimated spend: `requests_this_month × per-request cost for
-selectedModel`. This feeds the Profile screen's "Claude usage" figure and
+selected platform + model (pricing kept per platform/model; unknown
+pricing shows request count only). This feeds the Profile screen's "AI
+usage" figure and
 the Settings spend-alert comparison. It is an estimate, not a value
-fetched from the Anthropic API — there is no Anthropic billing endpoint
+fetched from any provider API — there is no billing endpoint
 call in v1.
 
 ## Inter-module protocol conventions

@@ -19,17 +19,19 @@ Fields exactly per SPEC.md data model table:
 | rawText | String | exactly what the user said or typed |
 | createdAt | Date | capture timestamp |
 | source | enum | siri \| inApp |
-| bucket | enum | quickTask \| scheduledTask \| longHorizon |
-| urgency | enum | low \| medium \| high |
+| bucket | enum? | quickTask \| scheduledTask \| longHorizon; nil until classified or sorted manually |
+| urgency | enum? | low \| medium \| high; nil until classified or sorted manually |
+| classifiedBy | enum? | llm \| manual; nil while unsorted. Review-rate stats count only llm |
 | deadline | Date? | nullable |
 | recurringInterval | enum? | none \| sixMonth \| annual \| custom |
-| confidence | Double | Claude's classification confidence |
+| customIntervalMonths | Int? | nullable; only set when recurringInterval == custom — the user-chosen repeat length in months. Never inferred/guessed by the provider. |
+| confidence | Double? | provider's classification confidence; nil for unsorted and manually sorted items |
 | status | enum | open \| completed \| snoozed |
 | reviewedAt | Date? | nightly review timestamp, nullable |
 | nextNudgeAt | Date? | next scheduled notification, long-horizon items |
 | isPreStructured | Bool | true for in-app conversational captures; excludes from nightly review |
 | lastCompletedAt | Date? | nullable; set when a long-horizon due-date check-in is marked "Done" |
-| transcriptionConfidence | Double? | nullable; on-device Speech confidence, distinct from `confidence` (Claude's classification confidence) |
+| transcriptionConfidence | Double? | nullable; on-device Speech confidence, distinct from `confidence` (the provider's classification confidence) |
 
 ### `AppSettings`
 
@@ -52,12 +54,14 @@ protocol, never ad hoc `UserDefaults` reads scattered across modules):
 | quietHoursEnabled | Bool | default true |
 | quietHoursStart | Date (time-of-day) | default 10:00 PM |
 | quietHoursEnd | Date (time-of-day) | default 7:00 AM |
-| selectedModel | enum | haiku \| sonnet — default haiku |
+| provider | enum | none \| deepseek \| anthropic — default none |
+| selectedModel | String | provider-scoped model id (not a Claude-only enum); default is the platform's cheapest |
+| appleDisplayName | String? | Sign in with Apple name, if shared |
 | monthlySpendAlertThreshold | Double | default 5.0 (USD) |
 | onboardingCompleted | Bool | default false |
 
-The Anthropic API key itself is **never** a field on `AppSettings` — it
-lives only in the Keychain, referenced by a stable key identifier if
+API keys (one per platform) and the Apple user identifier are **never**
+fields on `AppSettings` — they live only in the Keychain, referenced by a stable key identifier if
 needed, never copied into SwiftData or UserDefaults.
 
 ## Repository pattern
@@ -73,8 +77,12 @@ needed, never copied into SwiftData or UserDefaults.
 
 ## Query conventions
 
-- Nightly review query: `deadline == nil OR confidence < threshold`,
-  excluding `isPreStructured == true` items.
+- Nightly review query: `reviewedAt == nil AND (deadline == nil OR
+  confidence < threshold)`, excluding `isPreStructured == true` items.
+  The `reviewedAt == nil` check is required — without it, an already-
+  reviewed item with no deadline (e.g. a quick task) matches `deadline
+  == nil` forever and never leaves the queue. (Found via simulator
+  validation 2026-10-14; original query omitted this check.)
 - Long-horizon due query: `bucket == longHorizon AND nextNudgeAt <= now`.
 - Long-horizon tab query: "Nudging soon" = `bucket == longHorizon AND
   nextNudgeAt <= now + leadTimeFirstDays`; "Later" = everything else with
@@ -82,6 +90,15 @@ needed, never copied into SwiftData or UserDefaults.
 - Profile stats queries are read-only aggregates (counts, averages) over
   `ReminderItem` — never materialized as a separate stored field that
   could drift from the source data.
+
+## Custom recurring interval
+
+- `recurringInterval == custom` must never persist with `customIntervalMonths == nil`.
+  When the provider or a quick-reply chip tags an item as custom, the UI asks the
+  user for the repeat length (months) via a stepper before the item is
+  finalized as long-horizon.
+- All scheduling math (`NudgeSchedulingLogic.nextCycleDeadline`) reads
+  `customIntervalMonths` for `.custom` items rather than guessing a default.
 
 ## Migration policy
 

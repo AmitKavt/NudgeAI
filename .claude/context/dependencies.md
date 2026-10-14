@@ -10,8 +10,9 @@ owned_by: documenter
 ## Policy
 
 No third-party dependencies without explicit approval from the developer.
-This app is designed to run entirely on Apple frameworks plus one network
-dependency (the Claude API over URLSession), per CLAUDE.md's non-
+This app is designed to run entirely on Apple frameworks plus one optional network
+dependency (the user's chosen LLM platform, Anthropic or DeepSeek, over
+URLSession), per CLAUDE.md's non-
 negotiable rules.
 
 ## Approved (all first-party, no install step needed)
@@ -22,13 +23,16 @@ negotiable rules.
 - Speech (on-device transcription)
 - UserNotifications (UNUserNotificationCenter)
 - Security framework (Keychain access)
-- URLSession (Foundation) — the only network call, to the Claude API
+- AuthenticationServices (Sign in with Apple, local identity only)
+- URLSession (Foundation) — the only network call, to the chosen LLM platform's API (optional)
 - XCTest / Swift Testing — for test-engineer's unit tests
 
 ## Banned without explicit approval
 
 - Any third-party networking library (Alamofire, etc.) — URLSession is
   sufficient for a single API endpoint.
+- Any LLM provider SDK (Anthropic, DeepSeek, OpenAI-compatible) — use
+  the URLSession adapters.
 - Any third-party Keychain wrapper — use Security framework directly to
   avoid an extra trust boundary around the API key.
 - Any analytics/crash-reporting SDK — not needed for a personal single-

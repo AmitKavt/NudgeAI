@@ -13,9 +13,10 @@ owned_by: documenter
   TabBar (Today / Long-horizon / You) and routes first-launch to
   Onboarding. Owns nothing else; delegates immediately to Capture/
   Onboarding.
-- **Onboarding** — Welcome, Connect Claude, Teach Siri, Permissions
-  wizard. Owns: first-launch state (has the wizard completed), handing
-  off the API key to Settings/Keychain and permission requests to the
+- **Onboarding** — Welcome, Sign in with Apple, Choose AI platform (with
+  skip), Teach Siri, Permissions wizard (5 steps). Owns: first-launch
+  state (has the wizard completed), handing off the API key and Apple
+  identifier to Settings/Keychain and permission requests to the
   system frameworks. Runs once; never re-triggered unless the user resets
   the app.
 - **Capture** — Siri App Intent handler, in-app capture UI, speech-to-text
@@ -23,14 +24,17 @@ owned_by: documenter
   Owns: writing raw captured items to Persistence immediately.
   Must never import Classification directly — triggers it via an async
   fire-and-forget call only.
-- **Classification** — Claude API client, prompt templates, JSON contract
-  parsing, Claude-unreachable state tracking, local spend estimate.
+- **Classification** — provider-neutral client protocol, per-platform
+  adapters (Anthropic, DeepSeek), client factory (nil when no provider),
+  prompt templates, JSON contract
+  parsing, provider-unreachable state tracking, local spend estimate.
   Owns: turning rawText into bucket/urgency/deadline/confidence. Must
   never touch UI.
 - **Review** — nightly review flow and swipeable card-stack UI. Owns:
   querying undated/low-confidence items, swipe-right accept / swipe-left
-  skip interaction, surfacing the "paused until Claude is reachable"
-  state.
+  skip interaction, unsorted cards, the Adjust (manual sort) editor,
+  surfacing the "paused until [provider] is reachable" state (not when no
+  provider is connected).
 - **Reminders** — long-horizon escalation scheduling logic (recurring
   interval tagging, reschedule-on-incomplete), the Long-horizon tab
   (Nudging soon / Later), and the Reminder detail screen (schedule +
@@ -45,14 +49,15 @@ owned_by: documenter
   repositories. Owns: all reads/writes to the data store. Every other
   module reaches Persistence through a repository interface, never raw
   SwiftData queries.
-- **Settings** — Anthropic API key entry/replace (Keychain-backed),
+- **Settings** — platform picker, per-platform API key entry/replace/
+  disconnect (Keychain-backed),
   capture confirmation + ambiguous-transcription policy, review time,
   lead times + due-date-check-in toggle, quiet hours, model picker
-  (Haiku/Sonnet), monthly spend alert, language. Owns: the only code path
+  (per-platform), monthly spend alert, language. Owns: the only code path
   that writes to the Keychain; everything else it owns lives in
   `AppSettings`.
 - **Profile** — stats screen (capture count, one-tap-review rate, avg
-  capture time, Claude usage/spend). Owns: aggregating read-only queries
+  capture time, AI usage/spend, Apple identity/sign out). Owns: aggregating read-only queries
   over Persistence and Classification's spend estimate; writes nothing.
 
 ## Import boundaries
@@ -67,7 +72,7 @@ owned_by: documenter
 - Notifications → Persistence (read only, to pull stored copy/metadata),
   Notifications → Settings (read quiet hours, lead times, check-in toggle)
 - Settings → Persistence (config only, never ReminderItem data)
-- Onboarding → Settings (writes API key via Settings' Keychain path, not
+- Onboarding → Settings (writes API key and Apple identifier via Settings' Keychain path, not
   directly), Onboarding → App (signals first-launch complete)
 - Profile → Persistence (read only), Profile → Classification (read spend
   estimate only, never triggers a call)
@@ -84,6 +89,7 @@ owned_by: documenter
   logic anywhere.
 - No calendar/email integration code paths.
 - No project/sub-task hierarchy on ReminderItem.
-- No backend/server or account system — Onboarding's "Connect Claude"
-  step talks only to the Keychain and (to validate the key) the Claude
-  API directly, never a Nudge-operated server.
+- No backend/server or server-side account system — Onboarding's AI
+  platform step talks only to the Keychain and (to validate the key) the
+  chosen platform's API directly, never a Nudge-operated server. Sign in
+  with Apple is a local identity only.
