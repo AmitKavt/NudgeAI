@@ -1,11 +1,11 @@
 import SwiftUI
 
-/// Matches Figma node 7:93 ("Capture — Claude asks"): a single chat-thread
-/// sheet — type/speak the nudge in the bottom bar, Claude's follow-up and the
+/// Matches Figma node 7:93 ("Capture — follow-up question"): a single chat-thread
+/// sheet — type/speak the nudge in the bottom bar, the follow-up and the
 /// confirmation both render as chat bubbles in the same scroll.
 struct CaptureSheet: View {
     @ObservedObject var viewModel: CaptureViewModel
-    let client: ClassificationClient
+    let client: ClassificationClient?
     let reminderRepository: ReminderRepository
     let settingsRepository: SettingsRepository
     @Environment(\.dismiss) private var dismiss
@@ -24,7 +24,9 @@ struct CaptureSheet: View {
                     Text("New nudge")
                         .font(.nudgeDisplay(34))
                         .foregroundStyle(Theme.ink)
-                    Text("In here I can ask a quick question, so this skips tonight's review.")
+                    Text(client == nil
+                         ? "Saved as you capture it. You'll sort it at review."
+                         : "In here I can ask a quick question, so this skips tonight's review.")
                         .font(.system(size: 14))
                         .foregroundStyle(Theme.muted)
                 }
@@ -73,7 +75,7 @@ private final class FollowUpViewModelBox: ObservableObject {
 private struct FollowUpChatContent: View {
     @ObservedObject var box: FollowUpViewModelBox
     let item: ReminderItem
-    let client: ClassificationClient
+    let client: ClassificationClient?
     let reminderRepository: ReminderRepository
     let settingsRepository: SettingsRepository
 
@@ -157,7 +159,7 @@ struct UserBubble: View {
     }
 }
 
-struct ClaudeBubble: View {
+struct AssistantBubble: View {
     let text: String
 
     var body: some View {

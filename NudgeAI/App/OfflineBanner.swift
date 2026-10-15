@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Matches Figma node 7:200 ("Today — Claude unreachable").
+/// Matches Figma node 7:200 ("Today — provider unreachable").
 struct OfflineBanner: View {
+    let providerName: String
     var onRetry: (() -> Void)? = nil
 
     var body: some View {
@@ -9,7 +10,7 @@ struct OfflineBanner: View {
             Image(systemName: "exclamationmark.circle.fill")
                 .foregroundStyle(Theme.warn)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Can't reach Claude")
+                Text("Can't reach \(providerName)")
                     .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(Theme.warn)
                 Text("Your nudges are safe. I'll sort them when you're back online.")

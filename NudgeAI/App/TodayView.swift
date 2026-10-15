@@ -3,20 +3,37 @@ import SwiftData
 
 struct TodayView: View {
     @Environment(\.modelContext) private var modelContext
-    @ObservedObject private var unreachableState = ClaudeUnreachableState.shared
+    @ObservedObject private var unreachableState = ProviderUnreachableState.shared
     @State private var reviewPendingCount = 0
     @State private var todayItems: [ReminderItem] = []
+    @State private var provider: AIProvider = .none
+    @State private var noteDismissed = UserDefaults.standard.bool(forKey: TodayView.noteDismissedKey)
+
+    static let noteDismissedKey = "noProviderNoteDismissed"
 
     let onStartReview: () -> Void
+    var onConnectProvider: () -> Void = {}
 
-    private var isEmpty: Bool { todayItems.isEmpty && reviewPendingCount == 0 && !unreachableState.isUnreachable }
+    private var showUnreachable: Bool {
+        UnreachablePresentation.shouldShow(isUnreachable: unreachableState.isUnreachable, provider: provider)
+    }
+    private var isEmpty: Bool { todayItems.isEmpty && reviewPendingCount == 0 && !showUnreachable }
 
     var body: some View {
         GeometryReader { geometry in
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                if unreachableState.isUnreachable {
-                    OfflineBanner(onRetry: retryClassification)
+                if showUnreachable {
+                    OfflineBanner(providerName: provider.displayName, onRetry: retryClassification)
+                }
+                if provider == .none && !noteDismissed {
+                    NoProviderNote(
+                        onConnect: onConnectProvider,
+                        onDismiss: {
+                            UserDefaults.standard.set(true, forKey: Self.noteDismissedKey)
+                            noteDismissed = true
+                        }
+                    )
                 }
 
                 HStack {
@@ -39,8 +56,8 @@ struct TodayView: View {
                         )
                 }
 
-                if unreachableState.isUnreachable {
-                    PausedReviewCard()
+                if showUnreachable {
+                    PausedReviewCard(providerName: provider.displayName)
                 } else if reviewPendingCount > 0 {
                     ReviewSummaryCard(count: reviewPendingCount, onStartReview: onStartReview)
                 }
@@ -53,7 +70,7 @@ struct TodayView: View {
 
                         VStack(spacing: 0) {
                             ForEach(Array(todayItems.enumerated()), id: \.element.id) { index, item in
-                                TodayRow(item: item, isUnreachable: unreachableState.isUnreachable)
+                                TodayRow(item: item, isUnreachable: showUnreachable)
                                 if index < todayItems.count - 1 {
                                     Divider().background(Theme.line)
                                 }
@@ -86,6 +103,16 @@ struct TodayView: View {
 
     private func load() {
         let repository = SwiftDataReminderRepository(modelContext: modelContext)
+        let settingsRepository = SwiftDataSettingsRepository(modelContext: modelContext)
+        provider = (try? settingsRepository.fetchSettings().provider) ?? AIProvider.none
+        ProviderBackfill.runIfNeeded(modelContext: modelContext)
+        Task {
+            await NightlyReviewScheduling.refresh(
+                reminderRepository: repository,
+                settingsRepository: settingsRepository,
+                notificationScheduler: UNNotificationScheduler()
+            )
+        }
         reviewPendingCount = (try? repository.fetchNightlyReviewItems(
             confidenceThreshold: classificationConfidenceThreshold
         ).count) ?? 0
@@ -97,16 +124,17 @@ struct TodayView: View {
     }
 
     /// Retries by re-running the digest for anything still unclassified —
-    /// clears `ClaudeUnreachableState` automatically on success.
+    /// clears `ProviderUnreachableState` automatically on success.
     private func retryClassification() {
         let reminderRepository = SwiftDataReminderRepository(modelContext: modelContext)
         let settingsRepository = SwiftDataSettingsRepository(modelContext: modelContext)
+        guard let client = ClassificationClientFactory.makeClient(
+            settingsRepository: settingsRepository,
+            apiKeyStore: KeychainAPIKeyStore(),
+            spendEstimateRepository: SwiftDataSpendEstimateRepository(modelContext: modelContext)
+        ) else { return }
         let coordinator = ClassificationCoordinator(
-            client: AnthropicClassificationClient(
-                apiKeyStore: KeychainAPIKeyStore(),
-                settingsRepository: settingsRepository,
-                spendEstimateRepository: SwiftDataSpendEstimateRepository(modelContext: modelContext)
-            ),
+            client: client,
             reminderRepository: reminderRepository,
             settingsRepository: settingsRepository,
             unreachableState: .shared
@@ -118,13 +146,44 @@ struct TodayView: View {
     }
 }
 
+private struct NoProviderNote: View {
+    let onConnect: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("No AI platform connected. You'll sort nudges yourself at review.")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Theme.ink)
+                Button("Connect one", action: onConnect)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Theme.accent)
+            }
+            Spacer(minLength: 0)
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Theme.muted)
+                    .frame(width: 28, height: 28)
+            }
+            .accessibilityLabel("Dismiss")
+        }
+        .padding(16)
+        .background(Theme.surfaceAlt)
+        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.list))
+    }
+}
+
 private struct PausedReviewCard: View {
+    let providerName: String
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("TONIGHT'S REVIEW")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(Theme.muted)
-            Text("Paused until Claude is reachable")
+            Text("Paused until \(providerName) is reachable")
                 .font(.nudgeDisplay(28))
                 .foregroundStyle(Theme.ink)
         }

@@ -25,6 +25,12 @@ enum RecurringInterval: String, Codable {
     case custom
 }
 
+/// Who assigned bucket/urgency. nil while the item is still unsorted.
+enum ClassifiedBy: String, Codable {
+    case llm
+    case manual
+}
+
 enum ReminderStatus: String, Codable {
     case open
     case completed
@@ -43,6 +49,7 @@ final class ReminderItem: Identifiable {
     var recurringInterval: RecurringInterval?
     var customIntervalMonths: Int?
     var confidence: Double?
+    var classifiedBy: ClassifiedBy?
     var status: ReminderStatus
     var reviewedAt: Date?
     var nextNudgeAt: Date?
@@ -61,6 +68,7 @@ final class ReminderItem: Identifiable {
         recurringInterval: RecurringInterval? = nil,
         customIntervalMonths: Int? = nil,
         confidence: Double? = nil,
+        classifiedBy: ClassifiedBy? = nil,
         status: ReminderStatus = .open,
         reviewedAt: Date? = nil,
         nextNudgeAt: Date? = nil,
@@ -78,6 +86,7 @@ final class ReminderItem: Identifiable {
         self.recurringInterval = recurringInterval
         self.customIntervalMonths = customIntervalMonths
         self.confidence = confidence
+        self.classifiedBy = classifiedBy
         self.status = status
         self.reviewedAt = reviewedAt
         self.nextNudgeAt = nextNudgeAt

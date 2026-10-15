@@ -13,7 +13,14 @@ struct SettingsView: View {
     @State private var quietHoursStart = Date()
     @State private var quietHoursEnd = Date()
     @State private var siriPhrase = ""
-    @State private var selectedModel: ClaudeModel = .haiku
+    @State private var selectedModelId: String = ""
+    @State private var provider: AIProvider = .none
+    @State private var hasKey = false
+    @ObservedObject private var unreachableState = ProviderUnreachableState.shared
+
+    private var connectionStatus: ProviderConnectionStatus {
+        .resolve(selected: provider, activeProvider: provider, hasKey: hasKey, isUnreachable: unreachableState.isUnreachable, isKeyRejected: unreachableState.isKeyRejected)
+    }
 
     var body: some View {
         ScrollView {
@@ -73,33 +80,28 @@ struct SettingsView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    SectionEyebrow(text: "CLAUDE AND DATA")
+                    SectionEyebrow(text: "AI PLATFORM AND DATA")
                     GroupedCard {
-                        HStack {
-                            Text("API key").font(.system(size: 16, weight: .medium)).foregroundStyle(Theme.ink)
-                            Spacer()
-                            StatusChip(label: "Connected", style: .success)
+                        NavigationLink { aiPlatformView } label: {
+                            HStack {
+                                Text("Platform").font(.system(size: 16, weight: .medium)).foregroundStyle(Theme.ink)
+                                Spacer()
+                                Text(provider == .none ? "None" : provider.displayName)
+                                    .font(.system(size: 15)).foregroundStyle(Theme.muted)
+                                StatusChip(label: connectionStatus.label, style: statusStyle)
+                                Image(systemName: "chevron.right").font(.system(size: 13)).foregroundStyle(Theme.muted)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 14)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 14)
-                        SettingsRowDivider()
-                        NavigationLink {
-                            ClaudeAndPrivacyView(
-                                apiKeyStore: KeychainAPIKeyStore(),
-                                settingsRepository: settingsRepository,
-                                spendEstimateRepository: SwiftDataSpendEstimateRepository(modelContext: modelContext)
-                            )
-                        } label: {
-                            DisclosureRowLabel(title: "Model", value: selectedModel == .haiku ? "Claude Haiku" : "Claude Sonnet")
+                        if provider != .none {
+                            SettingsRowDivider()
+                            NavigationLink { aiPlatformView } label: {
+                                DisclosureRowLabel(title: "Model", value: ProviderModels.displayName(for: selectedModelId))
+                            }
                         }
                         SettingsRowDivider()
-                        NavigationLink {
-                            ClaudeAndPrivacyView(
-                                apiKeyStore: KeychainAPIKeyStore(),
-                                settingsRepository: settingsRepository,
-                                spendEstimateRepository: SwiftDataSpendEstimateRepository(modelContext: modelContext)
-                            )
-                        } label: {
+                        NavigationLink { aiPlatformView } label: {
                             DisclosureRowLabel(title: "Data and privacy")
                         }
                     }
@@ -110,6 +112,18 @@ struct SettingsView: View {
         .background(Theme.bg)
         .navigationBarHidden(true)
         .onAppear(perform: load)
+    }
+
+    private var aiPlatformView: some View {
+        AIPlatformView(apiKeyStore: KeychainAPIKeyStore(), settingsRepository: settingsRepository)
+    }
+
+    private var statusStyle: StatusChipStyle {
+        switch connectionStatus {
+        case .connected: return .success
+        case .cantReach, .keyRejected: return .warn
+        case .notConnected: return .neutral
+        }
     }
 
     private var settingsRepository: SettingsRepository {
@@ -126,7 +140,9 @@ struct SettingsView: View {
         quietHoursStart = settings.quietHoursStart
         quietHoursEnd = settings.quietHoursEnd
         siriPhrase = settings.siriPhrase
-        selectedModel = settings.selectedModel
+        selectedModelId = settings.modelId
+        provider = settings.provider
+        hasKey = KeychainAPIKeyStore().hasKey(for: settings.provider)
     }
 }
 

@@ -12,7 +12,8 @@ struct OnboardingFlowView: View {
         onComplete: @escaping () -> Void
     ) {
         _viewModel = StateObject(wrappedValue: OnboardingViewModel(
-            apiKeyStore: apiKeyStore,
+            connectService: ProviderConnectionService(apiKeyStore: apiKeyStore, settingsRepository: settingsRepository),
+            identity: AppleSignIn.makeManager(settingsRepository: settingsRepository),
             settingsRepository: settingsRepository,
             startingStep: startingStep
         ))
@@ -24,8 +25,10 @@ struct OnboardingFlowView: View {
             switch viewModel.step {
             case .welcome:
                 WelcomeStepView { viewModel.advance() }
-            case .connectClaude:
-                ConnectClaudeStepView(viewModel: viewModel)
+            case .signIn:
+                SignInStepView(viewModel: viewModel)
+            case .choosePlatform:
+                ChoosePlatformStepView(viewModel: viewModel)
             case .teachSiri:
                 TeachSiriStepView(onBack: viewModel.goBack, onNext: viewModel.advance)
             case .permissions:
@@ -61,7 +64,7 @@ private struct WelcomeStepView: View {
                         .font(.nudgeDisplay(40))
                         .foregroundStyle(Theme.ink)
                         .multilineTextAlignment(.center)
-                    Text("No categories, no deadlines, no decisions. Say it now. Claude sorts it out tonight.")
+                    Text("No categories, no deadlines, no decisions. Say it now. It gets sorted tonight.")
                         .font(.system(size: 16))
                         .foregroundStyle(Theme.muted)
                         .multilineTextAlignment(.center)
@@ -81,7 +84,7 @@ private struct WelcomeStepView: View {
                         .background(Theme.accent)
                         .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button))
                 }
-                Text("Your notes and key stay on this iPhone.")
+                Text("Your notes and keys stay on this iPhone.")
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.muted)
             }
@@ -91,55 +94,26 @@ private struct WelcomeStepView: View {
     }
 }
 
-/// Matches Figma node 6:25 ("1 of 3").
-private struct ConnectClaudeStepView: View {
+/// Sign in with Apple, local identity only. No Figma design exists; reuses onboarding vocabulary.
+private struct SignInStepView: View {
     @ObservedObject var viewModel: OnboardingViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            OnboardingNavHeader(step: 1, total: 3, onBack: viewModel.goBack)
+            OnboardingNavHeader(step: OnboardingStep.signIn.position, total: OnboardingStep.total, onBack: viewModel.goBack)
 
-            Text("Connect Claude")
+            Text("Make it yours")
                 .font(.nudgeDisplay(40))
                 .foregroundStyle(Theme.ink)
-            Text("Nudge uses your own Anthropic API key to sort what you capture. It lives in the iPhone Keychain.")
+            Text("Sign in with Apple to put your name on your profile. It stays on this iPhone. There is no Nudge account and no password.")
                 .font(.system(size: 16))
                 .foregroundStyle(Theme.muted)
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text("API key")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Theme.muted)
-                HStack {
-                    SecureField("sk-ant-...", text: $viewModel.apiKeyInput)
-                        .font(.system(size: 16))
-                    Button("Paste") {
-                        if let pasted = UIPasteboard.general.string {
-                            viewModel.apiKeyInput = pasted
-                        }
-                    }
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Theme.accent)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Theme.accentSoft)
-                    .clipShape(Capsule())
-                }
-                .padding(16)
-                .background(Theme.surface)
-                .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.list))
-                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.list).stroke(Theme.accent, lineWidth: 2))
-            }
-
-            if let error = viewModel.keyValidationError {
-                Text(error).font(.system(size: 13)).foregroundStyle(Theme.warn)
-            }
 
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "lock.fill").foregroundStyle(Theme.muted)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Private by design").font(.system(size: 15, weight: .bold)).foregroundStyle(Theme.ink)
-                    Text("Calls go straight from your phone to Claude. No server in between. Typical cost with Claude Haiku is well under $1 a month.")
+                    Text("Local identity only").font(.system(size: 15, weight: .bold)).foregroundStyle(Theme.ink)
+                    Text("Nothing is sent to a Nudge server. You can skip this and sign in later from the You tab.")
                         .font(.system(size: 14))
                         .foregroundStyle(Theme.muted)
                 }
@@ -151,16 +125,8 @@ private struct ConnectClaudeStepView: View {
             Spacer()
 
             VStack(spacing: 12) {
-                Button(action: viewModel.saveAPIKey) {
-                    Text("Verify and continue")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(Theme.onAccent)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Theme.accent)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button))
-                }
-                Button("I'll get a key first") { viewModel.advance() }
+                AppleSignInButton(manager: viewModel.identity) { viewModel.appleSignInFinished(success: $0) }
+                Button("Not now") { viewModel.skipSignIn() }
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Theme.accent)
             }
@@ -168,14 +134,109 @@ private struct ConnectClaudeStepView: View {
     }
 }
 
-/// Matches Figma node 6:61 ("2 of 3").
+private struct ChoosePlatformStepView: View {
+    @ObservedObject var viewModel: OnboardingViewModel
+    @ObservedObject private var connect: PlatformConnectModel
+
+    init(viewModel: OnboardingViewModel) {
+        self.viewModel = viewModel
+        _connect = ObservedObject(wrappedValue: viewModel.connect)
+    }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                OnboardingNavHeader(step: OnboardingStep.choosePlatform.position, total: OnboardingStep.total, onBack: viewModel.goBack)
+
+                Text("Choose your AI platform")
+                    .font(.nudgeDisplay(36))
+                    .foregroundStyle(Theme.ink)
+                Text("Nudge uses your own API key to sort what you capture. It lives in the iPhone Keychain.")
+                    .font(.system(size: 16))
+                    .foregroundStyle(Theme.muted)
+
+                VStack(spacing: 12) {
+                    ForEach(AIProvider.selectable, id: \.self) { option in
+                        RadioOptionCard(
+                            title: option.displayName,
+                            subtitle: PlatformConnectModel.platformBlurb(for: option),
+                            isSelected: connect.provider == option
+                        ) { connect.select(option) }
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("\(connect.provider.displayName) API key")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Theme.muted)
+                    HStack {
+                        SecureField(PlatformConnectModel.keyPlaceholder(for: connect.provider), text: $connect.keyInput)
+                            .font(.system(size: 16))
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        Button("Paste") {
+                            if let pasted = UIPasteboard.general.string { connect.keyInput = pasted }
+                        }
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Theme.accent)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Theme.accentSoft)
+                        .clipShape(Capsule())
+                    }
+                    .padding(16)
+                    .background(Theme.surface)
+                    .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.list))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.Radius.list).stroke(Theme.accent, lineWidth: 2))
+                }
+
+                if let error = connect.errorMessage {
+                    Text(error).font(.system(size: 13)).foregroundStyle(Theme.warn)
+                }
+
+                HStack(alignment: .top, spacing: 12) {
+                    Image(systemName: "lock.fill").foregroundStyle(Theme.muted)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Private by design").font(.system(size: 15, weight: .bold)).foregroundStyle(Theme.ink)
+                        Text("Calls go straight from your phone to the platform you chose. No server in between.")
+                            .font(.system(size: 14))
+                            .foregroundStyle(Theme.muted)
+                    }
+                }
+                .padding(16)
+                .background(Theme.surfaceAlt)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.list))
+
+                VStack(spacing: 12) {
+                    Button {
+                        Task { await viewModel.connectAndContinue() }
+                    } label: {
+                        Text(connect.isConnecting ? "Checking key..." : "Connect")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Theme.onAccent)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Theme.accent)
+                            .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button))
+                    }
+                    .disabled(connect.isConnecting)
+                    Button("Skip. I'll sort manually") { viewModel.skipPlatform() }
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Theme.accent)
+                }
+            }
+        }
+    }
+}
+
+/// Matches Figma node 6:61 .
 private struct TeachSiriStepView: View {
     let onBack: () -> Void
     let onNext: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            OnboardingNavHeader(step: 2, total: 3, onBack: onBack)
+            OnboardingNavHeader(step: OnboardingStep.teachSiri.position, total: OnboardingStep.total, onBack: onBack)
 
             Text("Teach Siri your phrase")
                 .font(.nudgeDisplay(36))
@@ -201,7 +262,7 @@ private struct TeachSiriStepView: View {
             VStack(alignment: .leading, spacing: 18) {
                 OnboardingStepItem(number: 1, title: "Say your thought", subtitle: "No questions. Nudge saves it exactly as you said it.")
                 OnboardingStepItem(number: 2, title: "Keep going with your day", subtitle: "Capture finishes in about two seconds.")
-                OnboardingStepItem(number: 3, title: "Tonight, Claude sorts it", subtitle: "You approve in one tap.")
+                OnboardingStepItem(number: 3, title: "Tonight, it gets sorted", subtitle: "By the AI if connected, by you otherwise. Approve in one tap.")
             }
 
             Spacer()
@@ -244,14 +305,14 @@ private struct OnboardingStepItem: View {
     }
 }
 
-/// Matches Figma node 6:109 ("3 of 3").
+/// Matches Figma node 6:109 .
 private struct PermissionsStepView: View {
     let onBack: () -> Void
     let onFinish: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
-            OnboardingNavHeader(step: 3, total: 3, onBack: onBack)
+            OnboardingNavHeader(step: OnboardingStep.permissions.position, total: OnboardingStep.total, onBack: onBack)
 
             Text("Three quick permissions")
                 .font(.nudgeDisplay(36))

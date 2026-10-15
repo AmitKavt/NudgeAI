@@ -32,11 +32,14 @@ struct CaptureNudgeIntent: AppIntent {
             throw error
         }
 
-        let classificationClient = AnthropicClassificationClient(
-            apiKeyStore: KeychainAPIKeyStore(),
+        // No provider or no key: the nudge stays stored and unsorted, silently.
+        guard let classificationClient = ClassificationClientFactory.makeClient(
             settingsRepository: settingsRepository,
+            apiKeyStore: KeychainAPIKeyStore(),
             spendEstimateRepository: SwiftDataSpendEstimateRepository(modelContext: modelContext)
-        )
+        ) else {
+            return .result(dialog: "Got it.")
+        }
         let coordinator = ClassificationCoordinator(
             client: classificationClient,
             reminderRepository: reminderRepository,

@@ -166,7 +166,7 @@ struct RadioOptionCard: View {
                             Text(badge).font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.accent)
                         }
                     }
-                    Text(subtitle).font(.system(size: 14)).foregroundStyle(Theme.muted)
+                    if !subtitle.isEmpty { Text(subtitle).font(.system(size: 14)).foregroundStyle(Theme.muted).multilineTextAlignment(.leading).fixedSize(horizontal: false, vertical: true) }
                 }
                 Spacer()
             }

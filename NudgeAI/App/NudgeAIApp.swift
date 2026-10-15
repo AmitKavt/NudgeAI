@@ -10,6 +10,14 @@ struct NudgeAIApp: App {
 
     init() {
         let container = modelContainer
+        PersistenceMigrations.runPhase7IfNeeded(
+            context: container.mainContext,
+            apiKeyStore: KeychainAPIKeyStore()
+        )
+        PersistenceMigrations.runKeychainAccessibilityIfNeeded(
+            apiKeyStore: KeychainAPIKeyStore(),
+            identityStore: KeychainAppleIdentityStore()
+        )
         UNUserNotificationCenter.current().delegate = NotificationActionHandler.shared
         NotificationActionHandler.shared.registerCategories()
 
