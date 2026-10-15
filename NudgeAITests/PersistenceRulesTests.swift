@@ -91,4 +91,13 @@ final class PersistenceRulesTests: XCTestCase {
         PersistenceMigrations.runPhase7IfNeeded(context: context, apiKeyStore: InMemoryKeyStore(), defaults: defaults)
         XCTAssertEqual(try settings.fetchSettings().provider, AIProvider.none)
     }
+
+    func testConfidenceThresholdIsReadLiveFromSettings() throws {
+        let container = try ModelContainer(for: ReminderItem.self, AppSettings.self, SpendEstimate.self,
+                                           configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let settings = SwiftDataSettingsRepository(modelContext: ModelContext(container))
+        XCTAssertEqual(settings.confidenceThreshold, 0.7, accuracy: 0.0001)
+        try settings.update { $0.confidenceThreshold = 0.85 }
+        XCTAssertEqual(settings.confidenceThreshold, 0.85, accuracy: 0.0001)
+    }
 }

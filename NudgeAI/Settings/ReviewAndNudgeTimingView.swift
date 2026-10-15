@@ -13,6 +13,7 @@ struct ReviewAndNudgeTimingView: View {
     @State private var quietHoursEnabled = true
     @State private var quietHoursStart = Date()
     @State private var quietHoursEnd = Date()
+    @State private var confidenceThreshold = 0.7
 
     var body: some View {
         ScrollView {
@@ -53,6 +54,30 @@ struct ReviewAndNudgeTimingView: View {
                             .foregroundStyle(Theme.muted)
                     }
                     .padding(16)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    SectionEyebrow(text: "SORTING CONFIDENCE")
+                    GroupedCard {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("Ask me to review below").font(.system(size: 16, weight: .bold)).foregroundStyle(Theme.ink)
+                                Spacer()
+                                Text("\(Int((confidenceThreshold * 100).rounded()))%")
+                                    .font(.system(size: 16, weight: .bold)).foregroundStyle(Theme.accent)
+                            }
+                            Slider(value: $confidenceThreshold, in: 0.5...0.95, step: 0.05)
+                                .tint(Theme.accent)
+                                .accessibilityLabel("Confidence needed to skip review")
+                                .onChange(of: confidenceThreshold) { _, newValue in
+                                    save { $0.confidenceThreshold = newValue }
+                                }
+                            Text("When the AI is less sure than this about where something goes, it waits for you at review. Higher means you review more.")
+                                .font(.system(size: 14))
+                                .foregroundStyle(Theme.muted)
+                        }
+                        .padding(16)
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -141,6 +166,7 @@ struct ReviewAndNudgeTimingView: View {
         quietHoursEnabled = settings.quietHoursEnabled
         quietHoursStart = settings.quietHoursStart
         quietHoursEnd = settings.quietHoursEnd
+        confidenceThreshold = min(0.95, max(0.5, settings.confidenceThreshold))
         let hour = Calendar.current.component(.hour, from: reviewTime)
         isCustomTime = ![20, 21, 22].contains(hour)
     }
