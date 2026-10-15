@@ -177,15 +177,7 @@ struct AIPlatformView: View {
         .overlay(RoundedRectangle(cornerRadius: Theme.Radius.list).stroke(Theme.line, lineWidth: 1))
     }
 
-    static func costCopy(for modelId: String) -> String {
-        switch modelId {
-        case ProviderModels.anthropicHaikuId: return "Fast and cheap. Great at sorting what you capture."
-        case ProviderModels.anthropicSonnetId: return "Better follow-up questions in the app. Costs more."
-        case ProviderModels.deepseekFlashId: return "Cheapest option. Great at sorting what you capture."
-        case ProviderModels.deepseekProId: return "Stronger answers. Costs more."
-        default: return ""
-        }
-    }
+    static func costCopy(for modelId: String) -> String { ProviderModels.blurb(for: modelId) }
 
     private func load() {
         guard let settings = try? settingsRepository.fetchSettings() else { return }
