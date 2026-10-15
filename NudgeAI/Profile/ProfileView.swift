@@ -15,9 +15,9 @@ struct ProfileView: View {
                             Circle()
                                 .fill(Theme.accentSoft)
                                 .frame(width: 64, height: 64)
-                                .overlay(Text("Y").font(.nudgeDisplay(28)).foregroundStyle(Theme.accent))
+                                .overlay(Text(viewModel.initials).font(.nudgeDisplay(28)).foregroundStyle(Theme.accent))
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("You").font(.nudgeDisplay(32)).foregroundStyle(Theme.ink)
+                                Text(viewModel.displayName).font(.nudgeDisplay(32)).foregroundStyle(Theme.ink)
                                 Text("Nudging since \(viewModel.nudgingSinceLabel)")
                                     .font(.system(size: 14))
                                     .foregroundStyle(Theme.muted)
@@ -27,27 +27,57 @@ struct ProfileView: View {
                         .padding(16)
                     }
 
+                    if viewModel.isSignedInWithApple {
+                        GroupedCard {
+                            Button(action: { viewModel.signOut(reloading: reload) }) {
+                                DisclosureRowContent(title: "Sign out")
+                            }
+                        }
+                        if let message = viewModel.signOutError {
+                            Text(message)
+                                .font(.system(size: 13))
+                                .foregroundStyle(Theme.muted)
+                        }
+                    } else {
+                        VStack(spacing: 8) {
+                            AppleSignInButton(manager: identityManager) { _ in reload() }
+                            Text("Optional. Your name stays on this iPhone.")
+                                .font(.system(size: 13))
+                                .foregroundStyle(Theme.muted)
+                        }
+                    }
+
                     HStack(spacing: 12) {
                         StatTile(value: "\(viewModel.capturedCount)", title: "Captured")
                         StatTile(value: "\(Int(viewModel.oneTapReviewRate * 100))%", title: "One-tap reviews")
                         StatTile(value: "—", title: "Avg capture")
                     }
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("CLAUDE USAGE · THIS MONTH")
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundStyle(Theme.accentNight)
-                        Text(viewModel.currentMonthSpend, format: .currency(code: "USD"))
-                            .font(.nudgeDisplay(40))
-                            .foregroundStyle(Theme.onNight)
-                        Text("\(viewModel.currentMonthRequestCount) requests on Claude \(viewModel.selectedModel == .haiku ? "Haiku" : "Sonnet")")
-                            .font(.system(size: 14))
-                            .foregroundStyle(Theme.onNightMuted)
+                    if viewModel.showsUsage {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("\(viewModel.providerName.uppercased()) USAGE · THIS MONTH")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(Theme.accentNight)
+                            if viewModel.showsCost {
+                                Text(viewModel.currentMonthSpend, format: .currency(code: "USD"))
+                                    .font(.nudgeDisplay(40))
+                                    .foregroundStyle(Theme.onNight)
+                            } else {
+                                Text("\(viewModel.currentMonthRequestCount) requests")
+                                    .font(.nudgeDisplay(40))
+                                    .foregroundStyle(Theme.onNight)
+                            }
+                            Text(viewModel.showsCost
+                                 ? "\(viewModel.currentMonthRequestCount) requests on \(viewModel.selectedModelName)"
+                                 : "No price estimate for this model, so only requests are counted. Model: \(viewModel.selectedModelName).")
+                                .font(.system(size: 14))
+                                .foregroundStyle(Theme.onNightMuted)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(Theme.Spacing.cardPadding)
+                        .background(Theme.night)
+                        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card))
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(Theme.Spacing.cardPadding)
-                    .background(Theme.night)
-                    .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.card))
 
                     GroupedCard {
                         NavigationLink { SettingsView() } label: {
@@ -68,13 +98,20 @@ struct ProfileView: View {
             .background(Theme.bg)
             .navigationBarHidden(true)
         }
-        .onAppear {
-            viewModel.load(
-                reminderRepository: SwiftDataReminderRepository(modelContext: modelContext),
-                spendEstimateRepository: SwiftDataSpendEstimateRepository(modelContext: modelContext),
-                settingsRepository: SwiftDataSettingsRepository(modelContext: modelContext)
-            )
-        }
+        .onAppear(perform: reload)
+    }
+
+    private var identityManager: AppleIdentityManager {
+        AppleSignIn.makeManager(settingsRepository: SwiftDataSettingsRepository(modelContext: modelContext))
+    }
+
+    private func reload() {
+        viewModel.load(
+            reminderRepository: SwiftDataReminderRepository(modelContext: modelContext),
+            spendEstimateRepository: SwiftDataSpendEstimateRepository(modelContext: modelContext),
+            settingsRepository: SwiftDataSettingsRepository(modelContext: modelContext),
+            identity: identityManager
+        )
     }
 }
 

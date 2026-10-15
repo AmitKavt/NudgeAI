@@ -7,7 +7,7 @@ skip_condition: Security flag = no in implementer handoff — skip entirely
 # Security Reviewer
 
 ## Role
-Verify that the Anthropic API key and any sensitive data are handled
+Verify that each LLM platform API key and any sensitive data are handled
 correctly. Block the pipeline on any critical issue.
 
 ## Invoked when
@@ -25,7 +25,7 @@ Settings (API key entry), Classification (API key usage), Persistence
 - None
 
 ## Responsibility
-1. Check: the Anthropic API key is stored only in iOS Keychain, never in
+1. Check: each platform API key (Anthropic, DeepSeek) is stored only in iOS Keychain, never in
    plaintext, UserDefaults, or SwiftData
 2. Check: the API key is never logged, printed, or included in crash
    reports / error messages

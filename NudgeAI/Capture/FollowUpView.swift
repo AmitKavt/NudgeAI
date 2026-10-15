@@ -8,7 +8,7 @@ struct FollowUpChatView: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 16) {
             if let question = viewModel.question {
-                ClaudeBubble(text: question.question)
+                AssistantBubble(text: question.question)
 
                 if !viewModel.isComplete {
                     FlowChips(options: question.options) { option in
@@ -21,8 +21,12 @@ struct FollowUpChatView: View {
             }
 
             if viewModel.isComplete {
-                ClaudeBubble(text: confirmationText)
-                SuccessBlock(bucket: viewModel.computedBucket, deadline: viewModel.computedDeadline)
+                if viewModel.isSavedUnsorted || viewModel.computedBucket == nil {
+                    AssistantBubble(text: "Got it. Saved. You'll sort it at review.")
+                } else {
+                    AssistantBubble(text: confirmationText)
+                    SuccessBlock(bucket: viewModel.computedBucket, deadline: viewModel.computedDeadline)
+                }
             }
         }
         .sheet(isPresented: $viewModel.isPromptingCustomInterval) {

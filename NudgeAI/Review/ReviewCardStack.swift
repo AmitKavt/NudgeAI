@@ -2,15 +2,15 @@ import SwiftUI
 
 struct ReviewCardStack: View {
     @ObservedObject var viewModel: ReviewViewModel
-    @ObservedObject private var unreachableState = ClaudeUnreachableState.shared
+    @ObservedObject private var unreachableState = ProviderUnreachableState.shared
 
     var body: some View {
         VStack(spacing: 18) {
             NavRow(remaining: viewModel.queue.count)
 
-            if unreachableState.isUnreachable {
+            if UnreachablePresentation.shouldShow(isUnreachable: unreachableState.isUnreachable, provider: viewModel.provider) {
                 Spacer()
-                Text("Paused until Claude is reachable")
+                Text("Paused until \(viewModel.provider.displayName) is reachable")
                     .font(.system(size: 14))
                     .foregroundStyle(Theme.warn)
                 Spacer()
@@ -22,6 +22,7 @@ struct ReviewCardStack: View {
                         DragGesture(minimumDistance: 24)
                             .onEnded { value in
                                 if value.translation.width > 0 {
+                                    // No-op while unsorted: sorting happens in Adjust.
                                     viewModel.accept(topItem)
                                 } else {
                                     viewModel.skip(topItem)
@@ -29,7 +30,9 @@ struct ReviewCardStack: View {
                             }
                     )
 
-                Text("Swipe right to accept · left to skip")
+                Text(canAccept(topItem)
+                     ? "Swipe right to accept · left to skip"
+                     : "Tap Adjust to sort it · swipe left to skip")
                     .font(.system(size: 13))
                     .foregroundStyle(Theme.muted)
 
@@ -46,9 +49,11 @@ struct ReviewCardStack: View {
                         .background(Theme.accent)
                         .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button))
                 }
+                .disabled(!canAccept(topItem))
+                .opacity(canAccept(topItem) ? 1 : 0.4)
 
                 HStack(spacing: 12) {
-                    SecondaryButton(label: "Adjust") { viewModel.skip(topItem) }
+                    SecondaryButton(label: "Adjust") { viewModel.beginAdjust(topItem) }
                     SecondaryButton(label: "Not today") { viewModel.skip(topItem) }
                 }
             } else {
@@ -73,6 +78,15 @@ struct ReviewCardStack: View {
                 viewModel.confirmCustomInterval(months: months)
             }
         }
+        .sheet(item: $viewModel.itemBeingAdjusted) { item in
+            AdjustSheet(item: item) { draft in
+                Task { await viewModel.saveAdjust(item, draft: draft) }
+            }
+        }
+    }
+
+    private func canAccept(_ item: ReminderItem) -> Bool {
+        ReviewRules.canAccept(bucket: item.bucket, urgency: item.urgency)
     }
 }
 
@@ -152,13 +166,27 @@ private struct ReviewCard: View {
 
             Divider().background(Theme.line)
 
-            HStack(spacing: 6) {
-                Image(systemName: "sparkle")
-                    .font(.system(size: 12))
-                    .foregroundStyle(Theme.accent)
-                Text("CLAUDE SUGGESTS")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(Theme.accent)
+            if ReviewRules.isUnsorted(bucket: item.bucket) {
+                HStack(spacing: 6) {
+                    Image(systemName: "tray")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.warn)
+                    Text("NEEDS SORTING")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(Theme.warn)
+                }
+                Text("Pick a type and urgency with Adjust.")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Theme.muted)
+            } else {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkle")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.accent)
+                    Text("SUGGESTED")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(Theme.accent)
+                }
             }
 
             if let bucket = item.bucket {
@@ -177,7 +205,7 @@ private struct ReviewCard: View {
                 InfoRow(label: "Deadline", value: deadline.formatted(date: .abbreviated, time: .omitted))
             }
 
-            if let confidence = item.confidence {
+            if item.bucket != nil, let confidence = item.confidence {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
                         Text("Confidence").font(.system(size: 12)).foregroundStyle(Theme.muted)

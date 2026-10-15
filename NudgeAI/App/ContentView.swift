@@ -25,6 +25,12 @@ struct ContentView: View {
             let settings = try? SwiftDataSettingsRepository(modelContext: modelContext).fetchSettings()
             hasCompletedOnboarding = settings?.onboardingCompleted ?? false
         }
+        .task {
+            // Revoked or not-found Apple credentials sign the user out locally; nudges stay.
+            await AppleSignIn.makeManager(
+                settingsRepository: SwiftDataSettingsRepository(modelContext: modelContext)
+            ).refreshOnLaunch()
+        }
     }
 }
 
@@ -32,6 +38,8 @@ private struct MainTabView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var selection: AppTab = .today
     @State private var isPresentingCapture = false
+    @State private var isPresentingSettings = false
+    @State private var todayRefresh = 0
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -40,7 +48,8 @@ private struct MainTabView: View {
             Group {
                 switch selection {
                 case .today:
-                    TodayView(onStartReview: { selection = .review })
+                    TodayView(onStartReview: { selection = .review }, onConnectProvider: { isPresentingSettings = true })
+                        .id(todayRefresh)
                 case .review:
                     ReviewScreen()
                 case .horizon:
@@ -60,6 +69,9 @@ private struct MainTabView: View {
                     .padding(.bottom, 8)
             }
         }
+        .sheet(isPresented: $isPresentingSettings, onDismiss: { todayRefresh += 1 }) {
+            NavigationStack { SettingsView() }
+        }
         .sheet(isPresented: $isPresentingCapture) {
             let reminderRepository = SwiftDataReminderRepository(modelContext: modelContext)
             let settingsRepository = SwiftDataSettingsRepository(modelContext: modelContext)
@@ -69,10 +81,12 @@ private struct MainTabView: View {
                     settingsRepository: settingsRepository,
                     transcriptionService: SpeechTranscriptionService()
                 ),
-                client: AnthropicClassificationClient(
-                    apiKeyStore: KeychainAPIKeyStore(),
+                client: ClassificationClientFactory.makeClient(
                     settingsRepository: settingsRepository,
-                    spendEstimateRepository: SwiftDataSpendEstimateRepository(modelContext: modelContext)
+                    apiKeyStore: KeychainAPIKeyStore(),
+                    spendEstimateRepository: SwiftDataSpendEstimateRepository(modelContext: modelContext),
+                    // Capture UI must never wait ~60s on the provider.
+                    requestTimeout: FollowUpViewModel.requestTimeout
                 ),
                 reminderRepository: reminderRepository,
                 settingsRepository: settingsRepository

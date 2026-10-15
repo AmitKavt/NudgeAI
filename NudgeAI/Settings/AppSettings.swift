@@ -1,6 +1,9 @@
 import Foundation
 import SwiftData
 
+/// Legacy (pre-Phase 7) model choice. Kept only as the stored `selectedModel`
+/// column so SwiftData lightweight migration needs no rename; read once by
+/// `PersistenceMigrations` to seed `modelId`. Do not use elsewhere.
 enum ClaudeModel: String, Codable {
     case haiku
     case sonnet
@@ -14,7 +17,13 @@ enum AmbiguousTranscriptionPolicy: String, Codable {
 @Model
 final class AppSettings {
     @Attribute(.unique) var id: UUID
+    /// Legacy column, see `ClaudeModel`. Superseded by `modelId`.
     var selectedModel: ClaudeModel
+    /// New optional/defaulted properties keep SwiftData lightweight migration valid.
+    var provider: AIProvider = AIProvider.none
+    /// Provider-scoped model id Resolved against `provider` via `ProviderModels.resolvedModelId`, so a stale value is harmless when provider is none.
+    var modelId: String = ProviderModels.anthropicHaikuId
+    var appleDisplayName: String?
 
     var siriPhrase: String
     var confirmWithHaptic: Bool
@@ -35,6 +44,9 @@ final class AppSettings {
     init(
         id: UUID = UUID(),
         selectedModel: ClaudeModel = .haiku,
+        provider: AIProvider = .none,
+        modelId: String = ProviderModels.anthropicHaikuId,
+        appleDisplayName: String? = nil,
         siriPhrase: String = "Hey Siri, nudge me",
         confirmWithHaptic: Bool = true,
         confirmWithSpokenWord: Bool = false,
@@ -53,6 +65,9 @@ final class AppSettings {
     ) {
         self.id = id
         self.selectedModel = selectedModel
+        self.provider = provider
+        self.modelId = modelId
+        self.appleDisplayName = appleDisplayName
         self.siriPhrase = siriPhrase
         self.confirmWithHaptic = confirmWithHaptic
         self.confirmWithSpokenWord = confirmWithSpokenWord
@@ -68,6 +83,13 @@ final class AppSettings {
         self.quietHoursEnd = quietHoursEnd
         self.monthlySpendAlertThreshold = monthlySpendAlertThreshold
         self.onboardingCompleted = onboardingCompleted
+    }
+
+    /// Switches platform and resets the model to that platform's default.
+    /// Call inside `SettingsRepository.update`.
+    func changeProvider(to newProvider: AIProvider) {
+        provider = newProvider
+        modelId = ProviderModels.defaultModelId(for: newProvider)
     }
 
     private static func defaultTimeOfDay(hour: Int, minute: Int) -> Date {

@@ -8,9 +8,15 @@ final class FollowUpViewModel: ObservableObject {
     @Published private(set) var computedBucket: ReminderBucket?
     @Published private(set) var computedDeadline: Date?
     @Published var isPromptingCustomInterval = false
+    /// True when no provider is connected: the nudge is saved unsorted, no question asked.
+    @Published private(set) var isSavedUnsorted = false
+
+    /// Provider calls made from the capture UI give up after this long; the nudge
+    /// is then saved unsorted instead of leaving the user waiting.
+    nonisolated static let requestTimeout: TimeInterval = 20
 
     private let item: ReminderItem
-    private let client: ClassificationClient
+    private let client: ClassificationClient?
     private let reminderRepository: ReminderRepository
     private let settingsRepository: SettingsRepository
     private let notificationScheduler: NotificationScheduler
@@ -20,7 +26,7 @@ final class FollowUpViewModel: ObservableObject {
 
     init(
         item: ReminderItem,
-        client: ClassificationClient,
+        client: ClassificationClient?,
         reminderRepository: ReminderRepository,
         settingsRepository: SettingsRepository,
         notificationScheduler: NotificationScheduler = UNNotificationScheduler()
@@ -33,6 +39,12 @@ final class FollowUpViewModel: ObservableObject {
     }
 
     func start() async {
+        // No provider connected: nothing to ask. The nudge stays stored and unsorted.
+        guard let client else {
+            isSavedUnsorted = true
+            isComplete = true
+            return
+        }
         classifyTask = Task {
             try? await client.classify(rawText: item.rawText)
         }
@@ -67,22 +79,32 @@ final class FollowUpViewModel: ObservableObject {
     private func finish(deadline: Date?, recurringInterval: RecurringInterval, customIntervalMonths: Int?) async {
         let classification = await classifyTask?.value
 
-        let bucket = classification?.bucket ?? .quickTask
-        let urgency = classification?.urgency ?? .medium
-        let confidence = classification?.confidence ?? 0
-
+        var bucket: ReminderBucket?
         do {
-            try reminderRepository.applyPreStructuredResult(
-                to: item.id,
-                bucket: bucket,
-                urgency: urgency,
-                deadline: deadline,
-                recurringInterval: recurringInterval,
-                customIntervalMonths: customIntervalMonths,
-                confidence: confidence
-            )
+            if let classification {
+                bucket = classification.bucket
+                try reminderRepository.applyPreStructuredResult(
+                    to: item.id,
+                    bucket: classification.bucket,
+                    urgency: classification.urgency,
+                    deadline: deadline,
+                    recurringInterval: recurringInterval,
+                    customIntervalMonths: customIntervalMonths,
+                    confidence: classification.confidence,
+                    classifiedBy: .llm
+                )
+            } else {
+                // No provider result (timeout / failure): never assume a bucket or
+                // urgency. Keep the user's chip choice; the item lands in review.
+                try reminderRepository.applyFollowUpChoice(
+                    to: item.id,
+                    deadline: deadline,
+                    recurringInterval: recurringInterval,
+                    customIntervalMonths: customIntervalMonths
+                )
+            }
         } catch {
-            logger.error("Failed to apply pre-structured result")
+            logger.error("Failed to apply follow-up result")
         }
 
         if bucket == .longHorizon, let deadline {

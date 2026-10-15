@@ -4,24 +4,35 @@ import os
 
 enum OnboardingStep: Int, CaseIterable {
     case welcome
-    case connectClaude
+    case signIn
+    case choosePlatform
     case teachSiri
     case permissions
+
+    static var total: Int { allCases.count }
+    /// 1-based position, shown as "N of 5" (Welcome has no header).
+    var position: Int { rawValue + 1 }
 }
 
 @MainActor
 final class OnboardingViewModel: ObservableObject {
-    @Published var step: OnboardingStep = .welcome
-    @Published var apiKeyInput: String = ""
-    @Published private(set) var isValidatingKey = false
-    @Published private(set) var keyValidationError: String?
+    @Published var step: OnboardingStep
+    @Published private(set) var signedInWithApple = false
+    @Published private(set) var signInNote: String?
+    let connect: PlatformConnectModel
 
-    private let apiKeyStore: APIKeyStore
     private let settingsRepository: SettingsRepository
+    let identity: AppleIdentityManager
     private let logger = Logger(subsystem: "com.shwairatech.nudgeai", category: "Onboarding")
 
-    init(apiKeyStore: APIKeyStore, settingsRepository: SettingsRepository, startingStep: OnboardingStep = .welcome) {
-        self.apiKeyStore = apiKeyStore
+    init(
+        connectService: ProviderConnectionService,
+        identity: AppleIdentityManager,
+        settingsRepository: SettingsRepository,
+        startingStep: OnboardingStep = .welcome
+    ) {
+        self.connect = PlatformConnectModel(service: connectService)
+        self.identity = identity
         self.settingsRepository = settingsRepository
         self.step = startingStep
     }
@@ -39,25 +50,21 @@ final class OnboardingViewModel: ObservableObject {
         step = previous
     }
 
-    /// Writes the key through the same Keychain-backed path Settings' API-key
-    /// replace flow uses — Onboarding never implements its own Keychain write,
-    /// per security-baseline.md.
-    func saveAPIKey() {
-        let trimmed = apiKeyInput.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            keyValidationError = "Enter your Anthropic API key."
-            return
-        }
-
-        do {
-            try apiKeyStore.saveAPIKey(trimmed)
-            keyValidationError = nil
-            advance()
-        } catch {
-            keyValidationError = "Couldn't save the key. Try again."
-            logger.error("Failed to save API key during onboarding")
-        }
+    /// Declined or failed sign-in continues with a local-only profile.
+    func appleSignInFinished(success: Bool) {
+        signedInWithApple = success
+        if !success { signInNote = "Continuing without Sign in with Apple. You can sign in later from You." }
+        advance()
     }
+
+    func skipSignIn() { advance() }
+
+    func connectAndContinue() async {
+        if await connect.connect() { advance() }
+    }
+
+    /// Leaves the provider as none; the app works with manual sorting.
+    func skipPlatform() { advance() }
 
     func requestPermissionsAndComplete() async {
         _ = await UNNotificationScheduler().requestAuthorization()

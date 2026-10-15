@@ -25,6 +25,11 @@ targets:
         NSSpeechRecognitionUsageDescription: "Nudge AI transcribes your spoken nudges on-device."
         UIAppFonts:
           - InstrumentSerif-Regular.ttf
+    entitlements:
+      path: NudgeAI/NudgeAI.entitlements
+      properties:
+        com.apple.developer.applesignin:
+          - Default
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.shwairatech.nudgeai
