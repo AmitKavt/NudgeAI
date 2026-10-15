@@ -1,4 +1,6 @@
-# Nudge AI
+<p align="center"><img src="References/Mockups/Logo/nudgeai-mark.png" width="128" alt="NudgeAI logo"></p>
+
+# NudgeAI
 
 A native iOS app that removes the friction between having a thought worth
 remembering and actually capturing it.

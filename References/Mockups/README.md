@@ -37,3 +37,17 @@ If the Figma file changes (new screens, renamed frames, a redesign of an
 existing flow), re-run `get_metadata` on node 4:4, update the table
 above, and re-sync `NudgeAI_Spec.md`/`SPEC.md`/`design.md` via the
 documenter rather than letting this map drift.
+
+## Logo
+
+`Logo/` holds the NudgeAI logo: a lowercase n with a notification dot, in the
+app's accent orange (`#e8590c`).
+
+| File | Use |
+|---|---|
+| `nudgeai-app-icon.svg` / `.png` | 1024 px full-bleed square for the iOS app icon (iOS rounds the corners) |
+| `nudgeai-mark.svg` / `.png` | rounded tile for the README, docs and marketing |
+| `nudgeai-glyph-ink.svg` | one-colour glyph, no background |
+
+The wordmark is "Nudge" in Instrument Serif with a small "AI" chip; it lives on
+the design canvas, not as a file, because it needs the font.
