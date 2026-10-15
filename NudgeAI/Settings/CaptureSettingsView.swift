@@ -1,4 +1,5 @@
 import SwiftUI
+import AppIntents
 
 /// Matches Figma node 9:334.
 struct CaptureSettingsView: View {
@@ -23,13 +24,11 @@ struct CaptureSettingsView: View {
                     Text("\u{201C}\(siriPhrase)\u{201D}")
                         .font(.nudgeDisplay(30))
                         .foregroundStyle(Theme.onNight)
-                    Button("Change phrase") {}
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundStyle(Theme.ink)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(Theme.surface)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.button))
+                    Text("Siri phrases are fixed by iOS. To use your own, add a shortcut in the Shortcuts app.")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Theme.onNightMuted)
+                    ShortcutsLink()
+                        .shortcutsLinkStyle(.automaticOutline)
                 }
                 .padding(Theme.Spacing.cardPadding)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -77,7 +76,7 @@ struct CaptureSettingsView: View {
 
     private func load() {
         guard let settings = try? settingsRepository.fetchSettings() else { return }
-        siriPhrase = settings.siriPhrase
+        siriPhrase = SiriPhrase.spoken
         confirmWithHaptic = settings.confirmWithHaptic
         confirmWithSpokenWord = settings.confirmWithSpokenWord
         language = settings.language

@@ -58,7 +58,7 @@ final class ProfileViewModel: ObservableObject {
         if let settings = try? settingsRepository.fetchSettings() {
             provider = settings.provider
             selectedModelName = ProviderModels.displayName(for: settings.modelId)
-            siriPhrase = settings.siriPhrase
+            siriPhrase = SiriPhrase.spoken
             appleDisplayName = settings.appleDisplayName
         }
         isSignedInWithApple = identity?.isSignedIn ?? false

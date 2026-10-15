@@ -1,7 +1,13 @@
 import Foundation
 import AVFoundation
 
-final class AudioRecorder {
+enum AudioRecorderError: Error {
+    case couldNotStart
+}
+
+/// Session activation blocks, so callers run these off the main thread.
+/// Used from one task at a time (start, then stop), hence `@unchecked Sendable`.
+final class AudioRecorder: @unchecked Sendable {
     private var recorder: AVAudioRecorder?
     private(set) var recordingURL: URL?
 
@@ -19,7 +25,7 @@ final class AudioRecorder {
         ]
 
         let recorder = try AVAudioRecorder(url: url, settings: settings)
-        recorder.record()
+        guard recorder.record() else { throw AudioRecorderError.couldNotStart }
         self.recorder = recorder
         self.recordingURL = url
         return url
