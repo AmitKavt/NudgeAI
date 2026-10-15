@@ -18,6 +18,7 @@ targets:
     info:
       path: NudgeAI/Info.plist
       properties:
+        CFBundleDisplayName: NudgeAI
         UILaunchScreen: {}
         UISupportedInterfaceOrientations~iphone:
           - UIInterfaceOrientationPortrait
