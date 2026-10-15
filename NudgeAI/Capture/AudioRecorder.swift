@@ -5,7 +5,9 @@ enum AudioRecorderError: Error {
     case couldNotStart
 }
 
-final class AudioRecorder {
+/// Session activation blocks, so callers run these off the main thread.
+/// Used from one task at a time (start, then stop), hence `@unchecked Sendable`.
+final class AudioRecorder: @unchecked Sendable {
     private var recorder: AVAudioRecorder?
     private(set) var recordingURL: URL?
 

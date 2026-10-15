@@ -52,7 +52,8 @@ final class CaptureViewModel: ObservableObject {
         }
 
         do {
-            _ = try audioRecorder.startRecording()
+            let recorder = audioRecorder
+            _ = try await Task.detached { try recorder.startRecording() }.value
             isRecording = true
         } catch {
             logger.error("Failed to start audio recording")
@@ -63,7 +64,8 @@ final class CaptureViewModel: ObservableObject {
     func stopVoiceInput() async {
         guard isRecording else { return }
         isRecording = false
-        guard let url = audioRecorder.stopRecording() else { return }
+        let recorder = audioRecorder
+        guard let url = await Task.detached(operation: { recorder.stopRecording() }).value else { return }
 
         do {
             let result = try await transcriptionService.transcribeAudioFile(at: url)
