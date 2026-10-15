@@ -6,6 +6,8 @@ struct ClassificationResult {
     let deadline: Date?
     let recurringInterval: RecurringInterval
     let confidence: Double
+    /// Set only when the provider's interval maps to a fixed custom length ("monthly" = 1).
+    var customIntervalMonths: Int? = nil
 }
 
 enum ClassificationError: Error {

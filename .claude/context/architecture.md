@@ -65,6 +65,11 @@ owned_by: documenter
 - Capture → Persistence (write), Capture → Classification (async trigger
   only, no return-value dependency)
 - Classification → Persistence (update after response)
+- Classification → Settings (reads `AIProvider`, `ProviderModels`, the Keychain
+  key store and `AppSettings`; Classification is the only reader of API keys at
+  request time)
+- Review → Classification (`NightlyReviewScheduling` refresh and the shared
+  confidence default; the live threshold is `AppSettings.confidenceThreshold`)
 - Review → Persistence (query), Review → Notifications (schedule after
   confirm)
 - Reminders → Persistence (query/update), Reminders → Notifications

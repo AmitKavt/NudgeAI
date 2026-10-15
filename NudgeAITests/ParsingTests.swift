@@ -30,6 +30,21 @@ final class ParsingTests: XCTestCase {
         let result = try LLMResponseParser.parseClassification(text: json)
         XCTAssertNil(result.deadline)
         XCTAssertEqual(result.recurringInterval, .custom)
+        XCTAssertEqual(result.customIntervalMonths, 1)
+    }
+
+    func testBareCustomLeavesLengthNil() throws {
+        let json = "{\"bucket\":\"long_horizon\",\"urgency\":\"low\",\"deadline\":null,\"recurring_interval\":\"custom\",\"confidence\":0.5}"
+        let result = try LLMResponseParser.parseClassification(text: json)
+        XCTAssertEqual(result.recurringInterval, .custom)
+        XCTAssertNil(result.customIntervalMonths)
+    }
+
+    func testOutOfRangeConfidenceIsUnparseable() {
+        for value in ["5", "-0.1", "1.01"] {
+            let json = "{\"bucket\":\"quick_task\",\"urgency\":\"low\",\"deadline\":null,\"recurring_interval\":\"none\",\"confidence\":\(value)}"
+            XCTAssertThrowsError(try LLMResponseParser.parseClassification(text: json), value)
+        }
     }
 
     func testDigestSkipsBadEntries() throws {

@@ -28,7 +28,7 @@ final class ReviewViewModel: ObservableObject {
 
     func loadQueue() {
         queue = (try? reminderRepository.fetchNightlyReviewItems(
-            confidenceThreshold: classificationConfidenceThreshold
+            confidenceThreshold: settingsRepository.confidenceThreshold
         )) ?? []
     }
 

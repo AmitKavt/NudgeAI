@@ -48,9 +48,12 @@ Response contract (must parse exactly, reject/flag anything else):
 
 - `confidence` below the configured threshold → item is NOT silently
   accepted; it's flagged for nightly review (`reviewedAt` stays null).
-- Malformed/unparseable JSON → treat as a classification failure, not a
-  crash — surface via the provider-unreachable/paused-review state (never
-  retry indefinitely).
+- Malformed/unparseable JSON, or a `confidence` outside 0...1 → treat as a
+  classification failure, not a crash. The item stays unsorted and goes to
+  nightly review (never silently assumed). This is NOT the unreachable state:
+  only network failures, timeouts, 429 and 5xx set it. Never retry in a loop.
+- `recurring_interval` "monthly" maps to `custom` with an explicit 1-month
+  length; a bare "custom" leaves the length nil so Review asks the user.
 - A request that fails outright (network error, timeout, 5xx) sets the
   app-wide "provider unreachable" state, consumed by the Today banner and
   Review's paused state; it clears automatically once a request succeeds.

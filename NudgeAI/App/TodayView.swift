@@ -114,7 +114,7 @@ struct TodayView: View {
             )
         }
         reviewPendingCount = (try? repository.fetchNightlyReviewItems(
-            confidenceThreshold: classificationConfidenceThreshold
+            confidenceThreshold: settingsRepository.confidenceThreshold
         ).count) ?? 0
 
         let calendar = Calendar.current
