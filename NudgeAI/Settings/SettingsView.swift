@@ -139,7 +139,7 @@ struct SettingsView: View {
         leadTimeSecondDays = settings.leadTimeSecondDays
         quietHoursStart = settings.quietHoursStart
         quietHoursEnd = settings.quietHoursEnd
-        siriPhrase = settings.siriPhrase
+        siriPhrase = SiriPhrase.spoken
         selectedModelId = settings.modelId
         provider = settings.provider
         hasKey = KeychainAPIKeyStore().hasKey(for: settings.provider)

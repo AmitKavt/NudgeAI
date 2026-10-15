@@ -1,6 +1,10 @@
 import Foundation
 import AVFoundation
 
+enum AudioRecorderError: Error {
+    case couldNotStart
+}
+
 final class AudioRecorder {
     private var recorder: AVAudioRecorder?
     private(set) var recordingURL: URL?
@@ -19,7 +23,7 @@ final class AudioRecorder {
         ]
 
         let recorder = try AVAudioRecorder(url: url, settings: settings)
-        recorder.record()
+        guard recorder.record() else { throw AudioRecorderError.couldNotStart }
         self.recorder = recorder
         self.recordingURL = url
         return url

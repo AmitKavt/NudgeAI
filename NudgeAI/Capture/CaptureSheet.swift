@@ -107,6 +107,7 @@ private struct InputBar: View {
     @ObservedObject var viewModel: CaptureViewModel
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
         HStack(spacing: 10) {
             TextField("Type or tap the mic", text: $viewModel.draftText)
                 .font(.system(size: 16))
@@ -141,6 +142,14 @@ private struct InputBar: View {
         .background(Theme.surface)
         .clipShape(Capsule())
         .overlay(Capsule().stroke(Theme.line, lineWidth: 1))
+        if let message = viewModel.voiceError {
+            Text(message)
+                .font(.system(size: 13))
+                .foregroundStyle(Theme.warn)
+                .padding(.horizontal, 16)
+                .accessibilityAddTraits(.updatesFrequently)
+        }
+        }
     }
 }
 

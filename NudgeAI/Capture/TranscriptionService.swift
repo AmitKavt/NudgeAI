@@ -5,6 +5,8 @@ import os
 enum TranscriptionError: Error {
     case authorizationDenied
     case recognizerUnavailable
+    case onDeviceUnavailable
+    case emptyTranscript
 }
 
 struct TranscriptionResult {
@@ -39,6 +41,12 @@ final class SpeechTranscriptionService: TranscriptionService {
             throw TranscriptionError.recognizerUnavailable
         }
 
+        // Transcription stays on-device (privacy rule); never fall back to Apple's servers.
+        guard recognizer.supportsOnDeviceRecognition else {
+            logger.error("On-device recognition unsupported")
+            throw TranscriptionError.onDeviceUnavailable
+        }
+
         let request = SFSpeechURLRecognitionRequest(url: url)
         request.requiresOnDeviceRecognition = true
 
@@ -49,6 +57,10 @@ final class SpeechTranscriptionService: TranscriptionService {
                     return
                 }
                 guard let result, result.isFinal else { return }
+                guard !result.bestTranscription.formattedString.isEmpty else {
+                    continuation.resume(throwing: TranscriptionError.emptyTranscript)
+                    return
+                }
 
                 let confidence = Self.averageConfidence(for: result)
                 continuation.resume(

@@ -247,7 +247,7 @@ private struct TeachSiriStepView: View {
 
             VStack(alignment: .leading, spacing: 10) {
                 Image(systemName: "mic.fill").font(.system(size: 18)).foregroundStyle(Theme.accentNight)
-                Text("\u{201C}Hey Siri, nudge me\u{201D}")
+                Text("\u{201C}\(SiriPhrase.spoken)\u{201D}")
                     .font(.nudgeDisplay(32))
                     .foregroundStyle(Theme.onNight)
                 Text("Then just say what's on your mind.")

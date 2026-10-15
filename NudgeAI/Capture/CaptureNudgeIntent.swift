@@ -52,13 +52,23 @@ struct CaptureNudgeIntent: AppIntent {
     }
 }
 
+/// The phrase Siri actually recognises. App Shortcuts phrases must contain the app name,
+/// so a bare "nudge me" does not work; keep the UI copy in step with `NudgeAIShortcuts`.
+enum SiriPhrase {
+    static var appName: String {
+        (Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String) ?? "NudgeAI"
+    }
+    static var spoken: String { "Hey Siri, nudge me with \(appName)" }
+}
+
 struct NudgeAIShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: CaptureNudgeIntent(),
             phrases: [
                 "Nudge me with \(.applicationName)",
-                "Add a nudge in \(.applicationName)"
+                "Add a nudge in \(.applicationName)",
+                "Capture a nudge with \(.applicationName)"
             ],
             shortTitle: "Nudge Me",
             systemImageName: "bell.badge"
