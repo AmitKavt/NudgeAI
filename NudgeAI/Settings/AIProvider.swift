@@ -11,6 +11,8 @@ enum AIProvider: String, Codable, CaseIterable {
 struct ProviderModel: Equatable {
     let id: String
     let displayName: String
+    /// One-line guidance shown under the model in the picker.
+    var blurb: String = ""
 }
 
 /// Provider-scoped model lists and defaults. Pure Swift — no framework imports.
@@ -35,13 +37,13 @@ enum ProviderModels {
             return []
         case .anthropic:
             return [
-                ProviderModel(id: anthropicHaikuId, displayName: "Claude Haiku"),
-                ProviderModel(id: anthropicSonnetId, displayName: "Claude Sonnet")
+                ProviderModel(id: anthropicHaikuId, displayName: "Claude Haiku", blurb: "Fast and cheap. Great at sorting what you capture."),
+                ProviderModel(id: anthropicSonnetId, displayName: "Claude Sonnet", blurb: "Better follow-up questions in the app. Costs more.")
             ]
         case .deepseek:
             return [
-                ProviderModel(id: deepseekFlashId, displayName: "DeepSeek Flash"),
-                ProviderModel(id: deepseekProId, displayName: "DeepSeek Pro")
+                ProviderModel(id: deepseekFlashId, displayName: "DeepSeek Flash", blurb: "Cheapest option. Great at sorting what you capture."),
+                ProviderModel(id: deepseekProId, displayName: "DeepSeek Pro", blurb: "Stronger answers. Costs more.")
             ]
         }
     }
@@ -49,6 +51,13 @@ enum ProviderModels {
     /// Default model id for a provider; empty for `.none`.
     static func defaultModelId(for provider: AIProvider) -> String {
         models(for: provider).first?.id ?? ""
+    }
+
+    static func blurb(for modelId: String) -> String {
+        for provider in AIProvider.allCases {
+            if let model = models(for: provider).first(where: { $0.id == modelId }) { return model.blurb }
+        }
+        return ""
     }
 
     static func displayName(for modelId: String) -> String {

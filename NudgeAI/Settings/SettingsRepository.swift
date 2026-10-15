@@ -10,6 +10,13 @@ protocol SettingsRepository {
     func update(_ mutate: (AppSettings) -> Void) throws
 }
 
+extension SettingsRepository {
+    /// Live confidence threshold below which an item goes to nightly review.
+    var confidenceThreshold: Double {
+        (try? fetchSettings().confidenceThreshold) ?? classificationConfidenceThreshold
+    }
+}
+
 final class SwiftDataSettingsRepository: SettingsRepository {
     private let modelContext: ModelContext
 

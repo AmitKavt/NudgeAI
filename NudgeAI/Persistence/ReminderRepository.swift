@@ -289,11 +289,11 @@ final class SwiftDataReminderRepository: ReminderRepository {
             return []
         }
         let longHorizon: ReminderBucket? = .longHorizon
+        let farFuture = Date.distantFuture   // an unscheduled item sorts as "later"
         let descriptor = FetchDescriptor<ReminderItem>(
             predicate: #Predicate { item in
                 item.bucket == longHorizon &&
-                item.nextNudgeAt != nil &&
-                item.nextNudgeAt! <= windowEnd
+                (item.nextNudgeAt ?? farFuture) <= windowEnd
             },
             sortBy: [SortDescriptor(\.nextNudgeAt, order: .forward)]
         )
@@ -306,10 +306,11 @@ final class SwiftDataReminderRepository: ReminderRepository {
             return []
         }
         let longHorizon: ReminderBucket? = .longHorizon
+        let farFuture = Date.distantFuture   // an unscheduled item sorts as "later"
         let descriptor = FetchDescriptor<ReminderItem>(
             predicate: #Predicate { item in
                 item.bucket == longHorizon &&
-                (item.nextNudgeAt == nil || item.nextNudgeAt! > windowEnd)
+                (item.nextNudgeAt ?? farFuture) > windowEnd
             },
             sortBy: [SortDescriptor(\.nextNudgeAt, order: .forward)]
         )

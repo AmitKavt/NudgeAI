@@ -2,8 +2,8 @@ import Foundation
 import os
 
 /// The confidence threshold below which an item is routed to nightly review
-/// instead of being auto-accepted. Hardcoded for now — not part of
-/// AppSettings.md's field set, so there's no Settings UI slot for it yet.
+/// instead of being auto-accepted. This is only the default; the live value is
+/// `AppSettings.confidenceThreshold`, read via `SettingsRepository.confidenceThreshold`.
 let classificationConfidenceThreshold = 0.7
 
 /// Single-flight guard so the backfill, Today retry and nightly digest never
@@ -51,7 +51,7 @@ final class ClassificationCoordinator {
         Task {
             do {
                 let result = try await client.classify(rawText: rawText)
-                let reviewedAt: Date? = result.confidence < classificationConfidenceThreshold ? nil : Date()
+                let reviewedAt: Date? = result.confidence < settingsRepository.confidenceThreshold ? nil : Date()
 
                 let applied = try reminderRepository.applyClassification(
                     to: itemId,
@@ -59,7 +59,7 @@ final class ClassificationCoordinator {
                     urgency: result.urgency,
                     deadline: result.deadline,
                     recurringInterval: result.recurringInterval,
-                    customIntervalMonths: nil,
+                    customIntervalMonths: result.customIntervalMonths,
                     confidence: result.confidence,
                     reviewedAt: reviewedAt
                 )
@@ -138,15 +138,19 @@ final class ClassificationCoordinator {
 
         do {
             let results = try await client.classifyDigest(items: digestItems)
+            if results.count < digestItems.count {
+                // Entries the model skipped or garbled stay unsorted and go to review.
+                logger.info("Batch classification left some items unsorted")
+            }
             for (id, result) in results {
-                let reviewedAt: Date? = result.confidence < classificationConfidenceThreshold ? nil : Date()
+                let reviewedAt: Date? = result.confidence < settingsRepository.confidenceThreshold ? nil : Date()
                 let applied = (try? reminderRepository.applyClassification(
                     to: id,
                     bucket: result.bucket,
                     urgency: result.urgency,
                     deadline: result.deadline,
                     recurringInterval: result.recurringInterval,
-                    customIntervalMonths: nil,
+                    customIntervalMonths: result.customIntervalMonths,
                     confidence: result.confidence,
                     reviewedAt: reviewedAt
                 )) ?? false
@@ -174,6 +178,7 @@ final class ClassificationCoordinator {
             logger.error("Batch classification key rejected by provider")
             return false
         } catch {
+            // Parse failures are not "unreachable": items stay unsorted and go to review.
             logger.error("Batch classification failed to parse")
             return true
         }
@@ -189,7 +194,7 @@ enum NightlyReviewScheduling {
         notificationScheduler: NotificationScheduler
     ) async {
         let pendingCount = (try? reminderRepository.fetchNightlyReviewItems(
-            confidenceThreshold: classificationConfidenceThreshold
+            confidenceThreshold: settingsRepository.confidenceThreshold
         ).count) ?? 0
         let reviewTime = (try? settingsRepository.fetchSettings())?.nightlyReviewTime
         let components = Calendar.current.dateComponents([.hour, .minute], from: reviewTime ?? Date())

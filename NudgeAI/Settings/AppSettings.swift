@@ -1,10 +1,10 @@
 import Foundation
 import SwiftData
 
-/// Legacy (pre-Phase 7) model choice. Kept only as the stored `selectedModel`
+/// Legacy (pre-Phase 7) model choice (formerly `ClaudeModel`). Kept only as the stored `selectedModel`
 /// column so SwiftData lightweight migration needs no rename; read once by
 /// `PersistenceMigrations` to seed `modelId`. Do not use elsewhere.
-enum ClaudeModel: String, Codable {
+enum LegacyModelChoice: String, Codable {
     case haiku
     case sonnet
 }
@@ -17,12 +17,15 @@ enum AmbiguousTranscriptionPolicy: String, Codable {
 @Model
 final class AppSettings {
     @Attribute(.unique) var id: UUID
-    /// Legacy column, see `ClaudeModel`. Superseded by `modelId`.
-    var selectedModel: ClaudeModel
+    /// Legacy column, see `LegacyModelChoice`. Superseded by `modelId`.
+    var selectedModel: LegacyModelChoice
     /// New optional/defaulted properties keep SwiftData lightweight migration valid.
     var provider: AIProvider = AIProvider.none
-    /// Provider-scoped model id Resolved against `provider` via `ProviderModels.resolvedModelId`, so a stale value is harmless when provider is none.
-    var modelId: String = ProviderModels.anthropicHaikuId
+    /// Provider-scoped model id. Empty until a platform is connected; always resolved
+    /// against `provider` via `ProviderModels.resolvedModelId`, so a stale value is harmless.
+    var modelId: String = ""
+    /// Confidence below this routes a classified item to nightly review.
+    var confidenceThreshold: Double = 0.7
     var appleDisplayName: String?
 
     var siriPhrase: String
@@ -43,9 +46,10 @@ final class AppSettings {
 
     init(
         id: UUID = UUID(),
-        selectedModel: ClaudeModel = .haiku,
+        selectedModel: LegacyModelChoice = .haiku,
         provider: AIProvider = .none,
-        modelId: String = ProviderModels.anthropicHaikuId,
+        modelId: String = "",
+        confidenceThreshold: Double = 0.7,
         appleDisplayName: String? = nil,
         siriPhrase: String = "Hey Siri, nudge me",
         confirmWithHaptic: Bool = true,
@@ -67,6 +71,7 @@ final class AppSettings {
         self.selectedModel = selectedModel
         self.provider = provider
         self.modelId = modelId
+        self.confidenceThreshold = confidenceThreshold
         self.appleDisplayName = appleDisplayName
         self.siriPhrase = siriPhrase
         self.confirmWithHaptic = confirmWithHaptic

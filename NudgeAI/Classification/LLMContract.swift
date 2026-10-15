@@ -189,11 +189,13 @@ enum LLMResponseParser {
         guard
             let bucket = Self.bucket(from: bucket),
             let urgency = ReminderUrgency(rawValue: urgency),
-            let interval = recurringInterval(from: interval)
+            let interval = recurringInterval(from: interval),
+            (0.0...1.0).contains(confidence)
         else { return nil }
         return ClassificationResult(
             bucket: bucket, urgency: urgency, deadline: deadline.flatMap(parseDate),
-            recurringInterval: interval, confidence: confidence
+            recurringInterval: interval.interval, confidence: confidence,
+            customIntervalMonths: interval.customMonths
         )
     }
 
@@ -215,12 +217,15 @@ enum LLMResponseParser {
         }
     }
 
-    private static func recurringInterval(from value: String) -> RecurringInterval? {
+    /// `customMonths` is set only for "monthly" (an explicit 1); a bare "custom"
+    /// stays nil so Review asks the user rather than guessing a length.
+    private static func recurringInterval(from value: String) -> (interval: RecurringInterval, customMonths: Int?)? {
         switch value {
-        case "none": return RecurringInterval.none
-        case "six_month": return .sixMonth
-        case "annual": return .annual
-        case "custom", "monthly": return .custom
+        case "none": return (RecurringInterval.none, nil)
+        case "six_month": return (.sixMonth, nil)
+        case "annual": return (.annual, nil)
+        case "monthly": return (.custom, 1)
+        case "custom": return (.custom, nil)
         default: return nil
         }
     }
